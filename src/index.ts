@@ -1,3 +1,3 @@
 export * from './Board';
-export * from './BitBoard';
+export * from './Bitboard';
 export * from './utils';
