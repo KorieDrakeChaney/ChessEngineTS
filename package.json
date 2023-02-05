@@ -1,0 +1,25 @@
+{
+  "name": "chess-engine-ts",
+  "version": "0.0.2",
+  "main": "index.ts",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KorieDrakeChaney/ChessEngineTS.git"
+  },
+  "keywords": [],
+  "author": "KorieDrakeChaney",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/KorieDrakeChaney/ChessEngineTS/issues"
+  },
+  "homepage": "https://github.com/KorieDrakeChaney/ChessEngineTS#readme",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "description": "A Chess Engine written in Typescript using bitboards",
+  "types": "dist/index.d.ts"
+}
