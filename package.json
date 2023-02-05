@@ -1,11 +1,11 @@
 {
   "name": "chess-engine-ts",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "index.ts",
   "scripts": {
     "format": "prettier --write \"src/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "preversion" : "yarn lint && yarn format"
+    "preversion": "yarn lint && yarn format"
   },
   "repository": {
     "type": "git",
