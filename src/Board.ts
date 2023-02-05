@@ -768,7 +768,7 @@ export class Board {
     const fromBit: bigint = 1n << BigInt(from);
     const enemyBoard: bigint =
       color === 'w' ? blackBoard & ~(this.k & this.blackBoard) : whiteBoard & ~(this.k & this.whiteBoard);
-      const allyBoard: bigint = color === 'w' ? whiteBoard : blackBoard;
+    const allyBoard: bigint = color === 'w' ? whiteBoard : blackBoard;
 
     // right
     for (let i = 1; i < 8; i++) {
