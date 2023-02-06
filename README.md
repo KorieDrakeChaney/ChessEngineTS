@@ -14,7 +14,7 @@ ChessEngineTS is my implementation of a bitboard chess engine written in typescr
 
 ## Installation
 
-Run the following command to install the most recent version of chess.js from NPM:
+Run the following command to install the most recent version of chess-engine-ts from NPM:
 
 ```sh
 npm install chess-engine-ts
