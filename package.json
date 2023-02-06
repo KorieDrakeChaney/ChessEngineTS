@@ -1,12 +1,12 @@
 {
   "name": "chess-engine-ts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "dist/index.js",
   "scripts": {
     "format": "prettier --write \"src/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "preversion": "tsc && yarn lint && yarn format",
-    "test" : "tsc && node dist/index.js"
+    "test": "tsc && node dist/index.js"
   },
   "repository": {
     "type": "git",
