@@ -33,8 +33,6 @@ The code below creates a board with pieces at starting position
 import { Board } from 'chess-engine-ts'
 
 const board = new Board();
-
-console.log(chess.exportFen());
 ```
 
 ## User Interface
