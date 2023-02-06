@@ -280,24 +280,22 @@ export class Board {
     const overview = this.overview();
     let offset = 0;
     for (let i = 0; i < overview.length; i++) {
-        const data = overview[i];
-        if (data) {
-          const piece = data.color === 'w' ? data.type.toUpperCase() : data.type;
-          if (offset > 0) fen += offset;
-          fen += piece;
+      const data = overview[i];
+      if (data) {
+        const piece = data.color === 'w' ? data.type.toUpperCase() : data.type;
+        if (offset > 0) fen += offset;
+        fen += piece;
 
-          offset = 0;
-        } 
-        else {
-          offset++;
-        }
-        
-        if ((i + 1) % 8 === 0 && i != 63) {
-          if (offset > 0) fen += offset;
-          fen += '/';
-          offset = 0;
-        }
-      
+        offset = 0;
+      } else {
+        offset++;
+      }
+
+      if ((i + 1) % 8 === 0 && i !== 63) {
+        if (offset > 0) fen += offset;
+        fen += '/';
+        offset = 0;
+      }
     }
     fen += ' ';
 
