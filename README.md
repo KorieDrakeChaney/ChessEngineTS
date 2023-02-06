@@ -91,7 +91,7 @@ console.log(chess.overview())
 //      {type: 'r', color: 'w', square: 'h1'}]
 ```
 
-### .loadFen([`string`])
+### .loadFen(fen : `string`)
 
 loads Fen
 
@@ -102,7 +102,7 @@ board.loadFen('rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1')
 
 ```
 
-### .exportFen()
+### .exportFen() : `string`
 
 Returns the FEN of the current position
 
