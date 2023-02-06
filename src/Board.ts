@@ -326,17 +326,20 @@ export class Board {
   public overview(): (PieceData | undefined)[] {
     const pieces: (PieceData | undefined)[] = [];
 
-    for (let i = 63; i >= 0; i--) {
-      const color: Color = ((1n << BigInt(i)) & this.whiteBoard) !== 0n ? 'w' : 'b';
-      if ((this.k & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'k', color, square: SQUARES[i] });
-      else if ((this.q & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'q', color, square: SQUARES[i] });
-      else if ((this.r & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'r', color, square: SQUARES[i] });
-      else if ((this.b & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'b', color, square: SQUARES[i] });
-      else if ((this.n & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'n', color, square: SQUARES[i] });
-      else if ((this.p & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'p', color, square: SQUARES[i] });
+    let offset = 0;
+    for (let i = 0; i < 64; i++) {
+      const coords = 0 + 8 * (7 - offset) + (i % 8);
+      const color: Color = ((1n << BigInt(coords)) & this.whiteBoard) !== 0n ? 'w' : 'b';
+      if ((this.k & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'k', color, square: SQUARES[coords] });
+      else if ((this.q & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'q', color, square: SQUARES[coords] });
+      else if ((this.r & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'r', color, square: SQUARES[coords] });
+      else if ((this.b & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'b', color, square: SQUARES[coords] });
+      else if ((this.n & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'n', color, square: SQUARES[coords] });
+      else if ((this.p & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'p', color, square: SQUARES[coords] });
       else {
         pieces.push(undefined);
       }
+      if((i+1) % 8 === 0) offset++;
     }
 
     return pieces;

@@ -5,7 +5,8 @@
   "scripts": {
     "format": "prettier --write \"src/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "preversion": "tsc && yarn lint && yarn format"
+    "preversion": "tsc && yarn lint && yarn format",
+    "test" : "tsc && node dist/index.js"
   },
   "repository": {
     "type": "git",
