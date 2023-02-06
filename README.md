@@ -27,7 +27,7 @@ yarn add chess-engine-ts
 
 ## Example Code
 
-The code below plays a random game of chess:
+The code below creates a board with pieces at starting position
 
 ```ts
 import { Board } from 'chess-engine-ts'
