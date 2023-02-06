@@ -326,7 +326,7 @@ export class Board {
   public overview(): (PieceData | undefined)[] {
     const pieces: (PieceData | undefined)[] = [];
 
-    for (let i = 0; i < 64; i++) {
+    for (let i = 63; i >= 0; i--) {
       const color: Color = ((1n << BigInt(i)) & this.whiteBoard) !== 0n ? 'w' : 'b';
       if ((this.k & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'k', color, square: SQUARES[i] });
       else if ((this.q & (1n << BigInt(i))) !== 0n) pieces.push({ type: 'q', color, square: SQUARES[i] });
