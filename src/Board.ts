@@ -211,14 +211,14 @@ export class Board {
   enPassantSq: Square | '-' = '-';
 
   constructor(fen = StartFEN) {
-    this.load(fen);
+    this.loadFen(fen);
     this.generateAllKnightMoves();
     this.generateAllKingMoves();
     this.generateAllPawnAttacks();
     this.generateLegalMoves();
   }
 
-  load(fen: string) {
+  loadFen(fen: string) {
     const reg = /^-?[\d.]+(?:e-?\d+)?$/;
     const values = fen.replaceAll('/', ' ').split(' ');
 
