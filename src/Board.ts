@@ -346,7 +346,7 @@ export class Board {
     return pieces;
   }
 
-  public generatePseudoLegalMoves(): void {
+  private generatePseudoLegalMoves(): void {
     /* tslint:disable:no-string-literal */
     this.pawnCaptures['w'] = 0n;
     /* tslint:disable:no-string-literal */
@@ -417,7 +417,7 @@ export class Board {
     }
   }
 
-  public generateLegalMoves() {
+  private generateLegalMoves() {
     this.generatePseudoLegalMoves();
     this.whiteValidMoves = 0n;
     this.blackValidMoves = 0n;
@@ -447,8 +447,8 @@ export class Board {
     }
   }
 
-  public validMoves(square: Square): bigint {
-    return this.validMoveList[square];
+  public validMoves(square: Square): Square[] {
+    return Bitboard.toSquares(this.validMoveList[square]);
   }
 
   public move(from: Square, to: Square): boolean {
@@ -584,7 +584,7 @@ export class Board {
     return true;
   }
 
-  public generatePawnMoves(
+  private generatePawnMoves(
     from: number,
     color: Color,
     whiteBoard: bigint = this.whiteBoard,
@@ -622,7 +622,7 @@ export class Board {
     return moves;
   }
 
-  public generateAllPawnAttacks() {
+  private generateAllPawnAttacks() {
     for (let i = 0; i < 64; i++) {
       const fromBit: bigint = 1n << BigInt(i);
       let whiteAttacks: bigint = 0n;
@@ -648,7 +648,7 @@ export class Board {
     }
   }
 
-  public generateAllKnightMoves(): void {
+  private generateAllKnightMoves(): void {
     /*
             0 0 0 0 0 0 0 0
             0 0 15 0 17 0 0 0
@@ -680,7 +680,7 @@ export class Board {
     }
   }
 
-  public generateAllKingMoves() {
+  private generateAllKingMoves() {
     for (let i = 0; i < 64; i++) {
       let moves: bigint = 0n;
       const fromBit: bigint = 1n << BigInt(i);
@@ -694,14 +694,14 @@ export class Board {
       if ((fromBit & HFILE) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 9n;
       if ((fromBit & AFILE) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 7n;
 
-      if ((fromBit & AFILE) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -7n;
-      if ((fromBit & HFILE) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -9n;
+      if ((fromBit & HFILE) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -7n;
+      if ((fromBit & AFILE) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -9n;
 
       this.kingMoves[i] = moves;
     }
   }
 
-  public blackAttacks(whiteBoard: bigint = this.whiteBoard, blackBoard: bigint = this.blackBoard): bigint {
+  private blackAttacks(whiteBoard: bigint = this.whiteBoard, blackBoard: bigint = this.blackBoard): bigint {
     let attackMask: bigint = 0n;
     for (let i = 0; i < 64; i++) {
       const color: Color = ((1n << BigInt(i)) & this.whiteBoard) !== 0n ? 'w' : 'b';
@@ -726,7 +726,7 @@ export class Board {
     return attackMask;
   }
 
-  public whiteAttacks(whiteBoard: bigint = this.whiteBoard, blackBoard: bigint = this.blackBoard): bigint {
+  private whiteAttacks(whiteBoard: bigint = this.whiteBoard, blackBoard: bigint = this.blackBoard): bigint {
     let attackMask: bigint = 0n;
     for (let i = 0; i < 64; i++) {
       const color: Color = ((1n << BigInt(i)) & this.whiteBoard) !== 0n ? 'w' : 'b';
@@ -751,7 +751,7 @@ export class Board {
     return attackMask;
   }
 
-  public generateRookMoves(
+  private generateRookMoves(
     from: number,
     color: Color,
     whiteBoard: bigint = this.whiteBoard,
@@ -829,7 +829,7 @@ export class Board {
     return { moves, attacks };
   }
 
-  public generateBishopMoves(
+  private generateBishopMoves(
     from: number,
     color: Color,
     whiteBoard: bigint = this.whiteBoard,
@@ -914,7 +914,7 @@ export class Board {
     return { moves, attacks };
   }
 
-  public isMoveValid(from: number, to: number, enPassant: boolean = false): boolean {
+  private isMoveValid(from: number, to: number, enPassant: boolean = false): boolean {
     const fromBit: bigint = 1n << BigInt(from);
     const toBit: bigint = 1n << BigInt(to);
     const color: Color = (fromBit & this.whiteBoard) !== 0n ? 'w' : 'b';
@@ -945,7 +945,7 @@ export class Board {
     return (this.turn === 'w' ? this.whiteValidMoves === 0n : this.blackValidMoves === 0n) && !this.isInCheck();
   }
 
-  public all(): bigint {
+  private all(): bigint {
     return this.whiteBoard | this.blackBoard;
   }
 }
