@@ -11,6 +11,7 @@ ChessEngineTS is my implementation of a bitboard chess engine written in typescr
 - Evaluation 
 - Load/Export PGN
 - FEN validation
+- Move history feature
 
 ## Installation
 
