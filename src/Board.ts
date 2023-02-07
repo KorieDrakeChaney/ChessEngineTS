@@ -502,16 +502,16 @@ export class Board {
 
       if (color === 'w') {
         if ((toBit & FOURTHRANK) !== 0n) {
-          if (((toBit >> 1n) & (this.p & this.blackBoard) && (fromBit & SECONDRANK) !== 0n) !== 0n)
+          if (((toBit >> 1n) & (this.p & this.blackBoard)) !== 0n && (fromBit & SECONDRANK) !== 0n)
             if (((toBit >> -8n) & this.all()) === 0n) this.enPassantSq = SQUARES[SquareIndex[to] - 8];
-          if (((toBit >> -1n) & (this.p & this.blackBoard) && (fromBit & SECONDRANK) !== 0n) !== 0n)
+          if (((toBit >> -1n) & (this.p & this.blackBoard)) !== 0n && (fromBit & SECONDRANK) !== 0n)
             if (((toBit >> -8n) & this.all()) === 0n) this.enPassantSq = SQUARES[SquareIndex[to] - 8];
         }
       } else {
         if ((toBit & FIFTHRANK) !== 0n) {
-          if (((toBit >> 1n) & (this.p & this.whiteBoard) && (fromBit & SEVENTHRANK) !== 0n) !== 0n)
+          if (((toBit >> 1n) & (this.p & this.whiteBoard)) !== 0n && (fromBit & SEVENTHRANK) !== 0n)
             if (((toBit >> 8n) & this.all()) === 0n) this.enPassantSq = SQUARES[SquareIndex[to] + 8];
-          if (((toBit >> -1n) & (this.p & this.whiteBoard) && (fromBit & SEVENTHRANK) !== 0n) !== 0n)
+          if (((toBit >> -1n) & (this.p & this.whiteBoard)) !== 0n && (fromBit & SEVENTHRANK) !== 0n)
             if (((toBit >> 8n) & this.all()) === 0n) this.enPassantSq = SQUARES[SquareIndex[to] + 8];
         }
       }
