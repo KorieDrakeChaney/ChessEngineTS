@@ -70,7 +70,7 @@ import { Board } from 'chess-engine-ts';
 
 const board = new Board()
 
-console.log(chess.overview())
+console.log(board.overview())
 
 //->    [
 //      {type: 'r', color: 'b', square: 'h8'},
