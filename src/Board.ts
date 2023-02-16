@@ -255,9 +255,6 @@ export class Board {
    * @internal
    * Holds a record for castling rights
    *
-   * @remark
-   * it checks true if it has the ability to castle, not if it can at that current moment
-   *
    * @example
    * ```ts
    *
