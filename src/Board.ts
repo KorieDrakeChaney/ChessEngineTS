@@ -1081,25 +1081,25 @@ export class Board {
     this.whiteAttackMask = this.whiteAttacks();
     this.blackAttackMask = this.blackAttacks();
 
-    if (this.castlingRights['w'].k) {
+    if (this.castlingRights['w'].k && !this.isCheck()) {
       if ((wkCastlingMask & (this.blackAttackMask | this.whiteBoard)) === 0n) {
         this.moveList['e1'] |= (1n << BigInt(SquareIndex['e1'])) << -2n;
       }
     }
 
-    if (this.castlingRights['w'].q) {
+    if (this.castlingRights['w'].q && !this.isCheck()) {
       if ((wqCastlingMask & (this.blackAttackMask | this.whiteBoard)) === 0n) {
         this.moveList['e1'] |= (1n << BigInt(SquareIndex['e1'])) << 2n;
       }
     }
 
-    if (this.castlingRights['b'].k) {
+    if (this.castlingRights['b'].k && !this.isCheck()) {
       if ((bkCastlingMask & (this.whiteAttackMask | this.blackBoard)) === 0n) {
         this.moveList['e8'] |= (1n << BigInt(SquareIndex['e8'])) << -2n;
       }
     }
 
-    if (this.castlingRights['b'].q) {
+    if (this.castlingRights['b'].q && !this.isCheck()) {
       if ((bqCastlingMask & (this.whiteAttackMask | this.blackBoard)) === 0n) {
         this.moveList['e8'] |= (1n << BigInt(SquareIndex['e8'])) << 2n;
       }
