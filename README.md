@@ -66,7 +66,7 @@ const board = new Board(
 Returns an array of elements consisting of piece data or empty squares(`undefined`)
 
 ```ts
-import { Board } from './Board';
+import { Board } from 'chess-engine-ts';
 
 const board = new Board()
 
