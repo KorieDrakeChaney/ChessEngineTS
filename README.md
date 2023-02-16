@@ -73,14 +73,14 @@ const board = new Board()
 console.log(board.overview())
 
 //->    [
-//      {type: 'r', color: 'b', square: 'h8'},
-//      {type: 'n', color: 'b', square: 'g8'},
-//      {type: 'b', color: 'b', square: 'f8'},
-//      {type: 'k', color: 'b', square: 'e8'},
-//      {type: 'q', color: 'b', square: 'd8'},
-//      {type: 'b', color: 'b', square: 'c8'},
-//      {type: 'n', color: 'b', square: 'b8'},
-//      {type: 'r', color: 'b', square: 'a8'},
+//      { type: 'r', color: 'b', square: 'a8' },
+//      { type: 'n', color: 'b', square: 'b8' },
+//      { type: 'b', color: 'b', square: 'c8' },
+//      { type: 'q', color: 'b', square: 'd8' },
+//      { type: 'k', color: 'b', square: 'e8' },
+//      { type: 'b', color: 'b', square: 'f8' },
+//      { type: 'n', color: 'b', square: 'g8' },
+//      { type: 'r', color: 'b', square: 'h8' },
 //      ...
 //      {type: 'r', color: 'w', square: 'a1'},
 //      {type: 'n', color: 'w', square: 'b1'},
