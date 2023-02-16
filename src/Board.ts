@@ -75,11 +75,11 @@ export class Board {
    * @example
    * ```ts
    *
-   * import { Board } from 'chess-engine-ts'
+   * import { Board , logBoard} from 'chess-engine-ts'
    *
    * const board = new Board();
    *
-   * console.log(moveList['b1'].toString(2).padStart(64, '0'));
+   * logBoard(board.moveList['b1']);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -166,11 +166,11 @@ export class Board {
    * @example
    * ```ts
    *
-   * import { Board } from 'chess-engine-ts'
+   * import { Board, logBoard } from 'chess-engine-ts'
    *
    * const board = new Board('6R1/pR1B1KPk/n7/3p2b1/7p/N3P3/1Pp4r/8 w - - 0 1');
    *
-   * console.log(board.moveList['d7'].toString(2).padStart(64, '0'));
+   * logBoard(board.moveList['d7']);
    *
    * // ->
    * // 0 0 1 0 1 0 0 0
@@ -286,18 +286,18 @@ export class Board {
 
   /**
    * @internal
-   * King bitboard
+   * Holds where each king is
    *
-   * @remarks
-   * lays out where each king is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.k.toString(2).padStart(64, '0'));
+   * logBoard(board.k);
    *
    * //->
    * // 0 0 0 0 1 0 0 0
@@ -316,18 +316,18 @@ export class Board {
   k = 0n;
   /**
    * @internal
-   * Queen bitboard
+   * Holds where each queen is
    *
-   * @remarks
-   * lays out where each queen is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.q.toString(2).padStart(64, '0'));
+   * logBoard(board.q);
    *
    * //->
    * // 0 0 0 1 0 0 0 0
@@ -346,18 +346,18 @@ export class Board {
   q = 0n;
   /**
    * @internal
-   * Rook bitboard
+   * Holds where each rook is
    *
-   * @remarks
-   * lays out where each rook is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.r.toString(2).padStart(64, '0'));
+   * logBoard(board.r);
    *
    * //->
    * // 1 0 0 0 0 0 0 1
@@ -376,18 +376,18 @@ export class Board {
   r = 0n;
   /**
    * @internal
-   * Bishop bitboard
+   * Holds where each bishop is
    *
-   * @remarks
-   * lays out where each bishop is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.b.toString(2).padStart(64, '0'));
+   * logBoard(board.b);
    *
    * //->
    * // 0 0 1 0 0 1 0 0
@@ -406,18 +406,18 @@ export class Board {
   b = 0n;
   /**
    * @internal
-   * Knight bitboard
+   * Holds where each knight is
    *
-   * @remarks
-   * lays out where each knight is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.n.toString(2).padStart(64, '0'));
+   * logBoard(board.n);
    *
    * //->
    * // 0 1 0 0 0 0 1 0
@@ -436,18 +436,18 @@ export class Board {
   n = 0n;
   /**
    * @internal
-   * Pawn bitboard
+   * Holds where each pawn is
    *
-   * @remarks
-   * lays out where each pawn is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.p.toString(2).padStart(64, '0'));
+   * logBoard(board.p);
    *
    * //->
    * // 0 0 0 0 0 0 0 0
@@ -467,18 +467,18 @@ export class Board {
 
   /**
    * @internal
-   * White pieces bitboard
+   * Holds where each white piece is
    *
-   * @remarks
-   * lays out where each white piece is
+   * @remark
+   * Updated every turn
    *
    * @example
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.whiteBoard.toString(2).padStart(64, '0'));
+   * logBoard(board.whiteBoard);
    *
    * //->
    * // 0 0 0 0 0 0 0 0
@@ -497,19 +497,19 @@ export class Board {
   whiteBoard = 0n;
   /**
    * @internal
-   * Black pieces bitboard
+   * Holds where the black pieces are
    *
-   * @remarks
-   * lays out where each black piece is
+   * @remark
+   * Updated every turn
    *
    * @example
    *
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.blackBoard.toString(2).padStart(64, '0'));
+   * logBoard(board.blackBoard);
    *
    * //->
    * // 1 1 1 1 1 1 1 1
@@ -528,19 +528,19 @@ export class Board {
 
   /**
    * @internal
-   * White attack masks
+   * Holds all the attacks rays for the white pieces
    *
-   * @remarks
-   * Shows all the attacks rays for the white pieces
+   * @remark
+   * Updated every turn
    *
    * @example
    *
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.whiteAttackMask.toString(2).padStart(64, '0'));
+   * logBoard(board.whiteAttackMask);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -559,19 +559,19 @@ export class Board {
   whiteAttackMask = 0n;
   /**
    * @internal
-   * Blacks attack masks
+   * Holds all the attacks rays for the black pieces
    *
-   * @remarks
-   * Shows all the attacks rays for the black pieces
+   * @remark
+   * Updated every turn
    *
    * @example
    *
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.blackAttackMask.toString(2).padStart(64, '0'));
+   * logBoard(board.blackAttackMask);
    *
    * // ->
    * // 0 1 1 1 1 1 1 0
@@ -590,20 +590,20 @@ export class Board {
   blackAttackMask = 0n;
   /**
    * @internal
-   * White valid moves
+   * Holds all the valids moves for the white pieces
    *
-   * @remarks
-   * Shows all the valids moves for the white pieces
+   * @remark
+   * Updated every turn
    *
    * @example
    *
    * ``` ts
    *
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
    *
-   * console.log(board.whiteValidMoves.toString(2).padStart(64, '0'));
+   * logBoard(board.whiteValidMoves);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -621,19 +621,19 @@ export class Board {
   whiteValidMoves = 0n;
   /**
    * @internal
-   * Black valid moves
+   * Holds all the valids moves for the black pieces
    *
-   * @remarks
-   * Shows all the valids moves for the black pieces
+   * @remark
+   * Updated every turn
    *
    * @example
    *
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1');
    *
-   * console.log(board.blackValidMoves.toString(2).padStart(64, '0'));
+   * logBoard(board.blackValidMoves);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -653,19 +653,20 @@ export class Board {
 
   /**
    * @internal
-   * Pawn captures
+   * Holds all the capture squares for pawns
+   *
    *
    * @remarks
-   * Shows all the capture squares for pawns
+   * pawn captures are updated after every move
    *
    * @example
    *
    * ```ts
-   * import { Board } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board('6k1/1B2pp2/P2BP3/3ppPp1/3p4/8/4R2K/3n2r1 w - - 0 1');
    *
-   * console.log(board.pawnCaptures['w'].toString(2).padStart(64, '0'));
+   * logBoard(board.pawnCaptures['w']);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -687,19 +688,18 @@ export class Board {
   };
   /**
    * @internal
-   * Knight moves
+   * A record that holds all knights moves dependent on which square it is on
    *
    * @remarks
-   * An array that holds all knights moves dependent on which square it is on
-   * note : these moves are pseudo-legal moves
+   * NOTE : these moves are pseudo-legal moves
    *
    * @example
    * ```ts
-   * import { Board, SquareIndex } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    *
    * const board = new Board();
-   * console.log(board.knightMoves[SquareIndex['b1']].toString(2).padStart(64, '0'));
+   * logBoard(board.knightMoves['b1']);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -714,21 +714,86 @@ export class Board {
    * ```
    * @group Piece Move Array
    */
-  knightMoves: bigint[] = new Array().fill(0n, 0, 64);
+  knightMoves: Record<Square, bigint> = {
+    a1: 0n,
+    b1: 0n,
+    c1: 0n,
+    d1: 0n,
+    e1: 0n,
+    f1: 0n,
+    g1: 0n,
+    h1: 0n,
+    a2: 0n,
+    b2: 0n,
+    c2: 0n,
+    d2: 0n,
+    e2: 0n,
+    f2: 0n,
+    g2: 0n,
+    h2: 0n,
+    a3: 0n,
+    b3: 0n,
+    c3: 0n,
+    d3: 0n,
+    e3: 0n,
+    f3: 0n,
+    g3: 0n,
+    h3: 0n,
+    a4: 0n,
+    b4: 0n,
+    c4: 0n,
+    d4: 0n,
+    e4: 0n,
+    f4: 0n,
+    g4: 0n,
+    h4: 0n,
+    a5: 0n,
+    b5: 0n,
+    c5: 0n,
+    d5: 0n,
+    e5: 0n,
+    f5: 0n,
+    g5: 0n,
+    h5: 0n,
+    a6: 0n,
+    b6: 0n,
+    c6: 0n,
+    d6: 0n,
+    e6: 0n,
+    f6: 0n,
+    g6: 0n,
+    h6: 0n,
+    a7: 0n,
+    b7: 0n,
+    c7: 0n,
+    d7: 0n,
+    e7: 0n,
+    f7: 0n,
+    g7: 0n,
+    h7: 0n,
+    a8: 0n,
+    b8: 0n,
+    c8: 0n,
+    d8: 0n,
+    e8: 0n,
+    f8: 0n,
+    g8: 0n,
+    h8: 0n,
+  };
   /**
    * @internal
-   * King moves
+   * A record that holds all king moves dependent on which square it is on
    *
    * @remarks
-   * An array that holds all king moves dependent on which square it is on
-   * note : these moves are pseudo-legal moves
+   * NOTE : these moves are pseudo-legal moves
+   *
    * @example
    *
    * ```ts
-   * import { Board, SquareIndex } from './chess-engine-ts';
+   * import { Board,  logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
-   * console.log(board.kingMoves[SquareIndex['f5']].toString(2).padStart(64, '0'));
+   * logBoard(board.kingMoves['f5']);
    *
    * // ->
    * // 0 0 0 0 0 0 0 0
@@ -743,26 +808,91 @@ export class Board {
    * ```
    * @group Piece Move Array
    */
-  kingMoves: bigint[] = new Array().fill(0n, 0, 64);
+  kingMoves: Record<Square, bigint> = {
+    a1: 0n,
+    b1: 0n,
+    c1: 0n,
+    d1: 0n,
+    e1: 0n,
+    f1: 0n,
+    g1: 0n,
+    h1: 0n,
+    a2: 0n,
+    b2: 0n,
+    c2: 0n,
+    d2: 0n,
+    e2: 0n,
+    f2: 0n,
+    g2: 0n,
+    h2: 0n,
+    a3: 0n,
+    b3: 0n,
+    c3: 0n,
+    d3: 0n,
+    e3: 0n,
+    f3: 0n,
+    g3: 0n,
+    h3: 0n,
+    a4: 0n,
+    b4: 0n,
+    c4: 0n,
+    d4: 0n,
+    e4: 0n,
+    f4: 0n,
+    g4: 0n,
+    h4: 0n,
+    a5: 0n,
+    b5: 0n,
+    c5: 0n,
+    d5: 0n,
+    e5: 0n,
+    f5: 0n,
+    g5: 0n,
+    h5: 0n,
+    a6: 0n,
+    b6: 0n,
+    c6: 0n,
+    d6: 0n,
+    e6: 0n,
+    f6: 0n,
+    g6: 0n,
+    h6: 0n,
+    a7: 0n,
+    b7: 0n,
+    c7: 0n,
+    d7: 0n,
+    e7: 0n,
+    f7: 0n,
+    g7: 0n,
+    h7: 0n,
+    a8: 0n,
+    b8: 0n,
+    c8: 0n,
+    d8: 0n,
+    e8: 0n,
+    f8: 0n,
+    g8: 0n,
+    h8: 0n,
+  };
   /**
    * @internal
    * Pawn attacks
    *
    * @remarks
-   * An array that holds all pawn attack rays dependent on square
+   * A record that holds two values `w` and `b` that holds all pawn attack rays dependent on square/color
    * @example
    *
    * ```ts
-   * import { Board, SquareIndex } from './chess-engine-ts';
+   * import { Board, logBoard } from './chess-engine-ts';
    *
    * const board = new Board();
-   * console.log(board.pawnAttacks['w'][SquareIndex['f5']].toString(2).padStart(64, '0'));
+   * logBoard(board.pawnAttacks['w']['f5']);
    *
    * // 0 0 0 0 0 0 0 0
    * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 1 0 1 0
    * // 0 0 0 0 0 0 0 0
    * // 0 0 0 0 0 0 0 0
-   * // 0 0 0 0 0 0 1 0
    * // 0 0 0 0 0 0 0 0
    * // 0 0 0 0 0 0 0 0
    * // 0 0 0 0 0 0 0 0
@@ -770,16 +900,146 @@ export class Board {
    * ```
    * @group Piece Move Array
    */
-  pawnAttacks: Record<Color, bigint[]> = {
-    w: new Array().fill(0n, 0, 64),
-    b: new Array().fill(0n, 0, 64),
+  pawnAttacks: Record<Color, Record<Square, bigint>> = {
+    w: {
+      a1: 0n,
+      b1: 0n,
+      c1: 0n,
+      d1: 0n,
+      e1: 0n,
+      f1: 0n,
+      g1: 0n,
+      h1: 0n,
+      a2: 0n,
+      b2: 0n,
+      c2: 0n,
+      d2: 0n,
+      e2: 0n,
+      f2: 0n,
+      g2: 0n,
+      h2: 0n,
+      a3: 0n,
+      b3: 0n,
+      c3: 0n,
+      d3: 0n,
+      e3: 0n,
+      f3: 0n,
+      g3: 0n,
+      h3: 0n,
+      a4: 0n,
+      b4: 0n,
+      c4: 0n,
+      d4: 0n,
+      e4: 0n,
+      f4: 0n,
+      g4: 0n,
+      h4: 0n,
+      a5: 0n,
+      b5: 0n,
+      c5: 0n,
+      d5: 0n,
+      e5: 0n,
+      f5: 0n,
+      g5: 0n,
+      h5: 0n,
+      a6: 0n,
+      b6: 0n,
+      c6: 0n,
+      d6: 0n,
+      e6: 0n,
+      f6: 0n,
+      g6: 0n,
+      h6: 0n,
+      a7: 0n,
+      b7: 0n,
+      c7: 0n,
+      d7: 0n,
+      e7: 0n,
+      f7: 0n,
+      g7: 0n,
+      h7: 0n,
+      a8: 0n,
+      b8: 0n,
+      c8: 0n,
+      d8: 0n,
+      e8: 0n,
+      f8: 0n,
+      g8: 0n,
+      h8: 0n,
+    },
+    b: {
+      a1: 0n,
+      b1: 0n,
+      c1: 0n,
+      d1: 0n,
+      e1: 0n,
+      f1: 0n,
+      g1: 0n,
+      h1: 0n,
+      a2: 0n,
+      b2: 0n,
+      c2: 0n,
+      d2: 0n,
+      e2: 0n,
+      f2: 0n,
+      g2: 0n,
+      h2: 0n,
+      a3: 0n,
+      b3: 0n,
+      c3: 0n,
+      d3: 0n,
+      e3: 0n,
+      f3: 0n,
+      g3: 0n,
+      h3: 0n,
+      a4: 0n,
+      b4: 0n,
+      c4: 0n,
+      d4: 0n,
+      e4: 0n,
+      f4: 0n,
+      g4: 0n,
+      h4: 0n,
+      a5: 0n,
+      b5: 0n,
+      c5: 0n,
+      d5: 0n,
+      e5: 0n,
+      f5: 0n,
+      g5: 0n,
+      h5: 0n,
+      a6: 0n,
+      b6: 0n,
+      c6: 0n,
+      d6: 0n,
+      e6: 0n,
+      f6: 0n,
+      g6: 0n,
+      h6: 0n,
+      a7: 0n,
+      b7: 0n,
+      c7: 0n,
+      d7: 0n,
+      e7: 0n,
+      f7: 0n,
+      g7: 0n,
+      h7: 0n,
+      a8: 0n,
+      b8: 0n,
+      c8: 0n,
+      d8: 0n,
+      e8: 0n,
+      f8: 0n,
+      g8: 0n,
+      h8: 0n,
+    },
   };
 
   /**
    * Half moves
    *
    * @remarks
-   * Shows how many moves have been played since the last capture or pawn moves
+   * Holds how many moves have been played since the last capture or pawn moves
    *
    * @example
    * ```ts
@@ -800,7 +1060,7 @@ export class Board {
    * Full moves
    *
    * @remarks
-   * Shows how many complete moves have been played
+   * Holds how many complete moves have been played
    *
    * @example
    * ```ts
@@ -823,7 +1083,7 @@ export class Board {
    * En Passant Square
    *
    * @remarks
-   * Shows the En Passant Square
+   * Holds the En Passant Square
    *
    * @group En Passant Square
    */
@@ -852,7 +1112,6 @@ export class Board {
    *
    * ```
    *
-   * @returns void
    */
 
   public loadFen(fen: string): void {
@@ -929,7 +1188,6 @@ export class Board {
    * //-> rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1
    *
    * ```
-   * @returns string
    */
   public exportFen(): string {
     let fen = '';
@@ -1061,7 +1319,7 @@ export class Board {
       this.validMoveList[SQUARES[i]] = 0n;
       if (color !== this.turn) continue;
       if ((this.k & (1n << BigInt(i))) !== 0n) {
-        this.moveList[SQUARES[i]] = this.kingMoves[i] & ~(color === 'w' ? this.whiteBoard : this.blackBoard);
+        this.moveList[SQUARES[i]] = this.kingMoves[SQUARES[i]] & ~(color === 'w' ? this.whiteBoard : this.blackBoard);
       } else if ((this.q & (1n << BigInt(i))) !== 0n) {
         this.moveList[SQUARES[i]] = this.generateRookMoves(i, color).moves | this.generateBishopMoves(i, color).moves;
       } else if ((this.r & (1n << BigInt(i))) !== 0n) {
@@ -1069,9 +1327,10 @@ export class Board {
       } else if ((this.b & (1n << BigInt(i))) !== 0n) {
         this.moveList[SQUARES[i]] = this.generateBishopMoves(i, color).moves;
       } else if ((this.n & (1n << BigInt(i))) !== 0n) {
-        this.moveList[SQUARES[i]] = this.knightMoves[i] & ~(color === 'w' ? this.whiteBoard : this.blackBoard);
+        this.moveList[SQUARES[i]] = this.knightMoves[SQUARES[i]] & ~(color === 'w' ? this.whiteBoard : this.blackBoard);
       } else if ((this.p & (1n << BigInt(i))) !== 0n) {
-        this.pawnCaptures[color] |= this.pawnAttacks[color][i] & (color === 'w' ? this.blackBoard : this.whiteBoard);
+        this.pawnCaptures[color] |=
+          this.pawnAttacks[color][SQUARES[i]] & (color === 'w' ? this.blackBoard : this.whiteBoard);
         this.moveList[SQUARES[i]] = this.generatePawnMoves(i, color) | this.pawnCaptures[color];
       } else {
         this.moveList[SQUARES[i]] = 0n;
@@ -1152,7 +1411,6 @@ export class Board {
    * ```
    *
    * @param square - Square
-   * @returns Square[]
    *
    * @group Piece Moves
    */
@@ -1178,7 +1436,6 @@ export class Board {
    *
    *  @param to - Square
    *
-   *  @returns boolean
    *
    *  @group Piece Moves
    */
@@ -1369,7 +1626,7 @@ export class Board {
         whiteAttacks |= fromBit << 9n;
       }
 
-      this.pawnAttacks['w'][i] = whiteAttacks;
+      this.pawnAttacks['w'][SQUARES[i]] = whiteAttacks;
 
       if ((fromBit & HFILE) === 0n && (fromBit & FIRSTRANK) === 0n) {
         blackAttacks |= fromBit << -9n;
@@ -1378,7 +1635,7 @@ export class Board {
         blackAttacks |= fromBit << -7n;
       }
 
-      this.pawnAttacks['b'][i] = blackAttacks;
+      this.pawnAttacks['b'][SQUARES[i]] = blackAttacks;
     }
   }
 
@@ -1410,7 +1667,7 @@ export class Board {
       if ((fromBit & (AFILE | BFILE)) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 10n;
       if ((fromBit & (GFILE | HFILE)) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -10n;
 
-      this.knightMoves[i] = moves;
+      this.knightMoves[SQUARES[i]] = moves;
     }
   }
 
@@ -1431,7 +1688,7 @@ export class Board {
       if ((fromBit & (AFILE | FIRSTRANK)) === 0n) moves |= fromBit << -7n;
       if ((fromBit & (HFILE | FIRSTRANK)) === 0n) moves |= fromBit << -9n;
 
-      this.kingMoves[i] = moves;
+      this.kingMoves[SQUARES[i]] = moves;
     }
   }
 
@@ -1449,11 +1706,11 @@ export class Board {
       } else if ((this.b & blackBoard & (1n << BigInt(i))) !== 0n) {
         attackMask |= this.generateBishopMoves(i, color, whiteBoard, blackBoard).attacks;
       } else if ((this.p & blackBoard & (1n << BigInt(i))) !== 0n) {
-        attackMask |= this.pawnAttacks[color][i];
+        attackMask |= this.pawnAttacks[color][SQUARES[i]];
       } else if ((this.n & blackBoard & (1n << BigInt(i))) !== 0n) {
-        attackMask |= this.knightMoves[i];
+        attackMask |= this.knightMoves[SQUARES[i]];
       } else if ((this.k & blackBoard & (1n << BigInt(i))) !== 0n) {
-        attackMask |= this.kingMoves[i];
+        attackMask |= this.kingMoves[SQUARES[i]];
       }
     }
 
@@ -1474,11 +1731,11 @@ export class Board {
       } else if ((this.b & whiteBoard & (1n << BigInt(i))) !== 0n) {
         attackMask |= this.generateBishopMoves(i, color, whiteBoard, blackBoard).attacks;
       } else if ((this.p & whiteBoard & (1n << BigInt(i))) !== 0n) {
-        attackMask |= this.pawnAttacks[color][i];
+        attackMask |= this.pawnAttacks[color][SQUARES[i]];
       } else if ((this.n & whiteBoard & (1n << BigInt(i))) !== 0n) {
-        attackMask |= this.knightMoves[i];
+        attackMask |= this.knightMoves[SQUARES[i]];
       } else if ((this.k & whiteBoard & (1n << BigInt(i))) !== 0n) {
-        attackMask |= this.kingMoves[i];
+        attackMask |= this.kingMoves[SQUARES[i]];
       }
     }
 
@@ -1730,7 +1987,32 @@ export class Board {
     return (this.turn === 'w' ? this.whiteValidMoves === 0n : this.blackValidMoves === 0n) && !this.isCheck();
   }
 
-  private all(): bigint {
+  /**
+   * Combines both whiteBoard and blackBoard and returns full board
+   *
+   * @example
+   * ```ts
+   * import { Board, logBoard } from 'chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * logBoard(board.all());
+   *
+   * //->
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * ```
+   *
+   * @group Color Bitboards
+   *
+   */
+  public all(): bigint {
     return this.whiteBoard | this.blackBoard;
   }
 }

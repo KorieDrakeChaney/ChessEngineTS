@@ -370,4 +370,29 @@ export const toSquares = (board: bigint): Square[] => {
   return squares;
 };
 
+/**
+ *
+ * Logs 8x8 representation of the bigint
+ *
+ * @example
+ * ```ts
+ * import { Board, logBoard } from 'chess-engine-ts';
+ *
+ *  const board = new Board();
+ *
+ *  // logs all the knight pieces
+ *  logBoard(board.n);
+ *
+ * ```
+ *
+ * @param board - bigint
+ */
+
+export const logBoard = (board: bigint): void => {
+  let string = board.toString(2).padStart(64, '0');
+  for (let i = 0; i < 8; i++) {
+    console.log(string.slice(i * 8, i * 8 + 8));
+  }
+};
+
 export const StartFEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
