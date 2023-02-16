@@ -135,6 +135,7 @@ export const SquareIndex: Record<Square, number> = {
   f1: 2 + 8 * 0,
   g1: 1 + 8 * 0,
   h1: 0 + 8 * 0,
+
   a2: 7 + 8 * 1,
   b2: 6 + 8 * 1,
   c2: 5 + 8 * 1,
@@ -143,6 +144,7 @@ export const SquareIndex: Record<Square, number> = {
   f2: 2 + 8 * 1,
   g2: 1 + 8 * 1,
   h2: 0 + 8 * 1,
+
   a3: 7 + 8 * 2,
   b3: 6 + 8 * 2,
   c3: 5 + 8 * 2,
@@ -151,6 +153,7 @@ export const SquareIndex: Record<Square, number> = {
   f3: 2 + 8 * 2,
   g3: 1 + 8 * 2,
   h3: 0 + 8 * 2,
+
   a4: 7 + 8 * 3,
   b4: 6 + 8 * 3,
   c4: 5 + 8 * 3,
@@ -159,6 +162,7 @@ export const SquareIndex: Record<Square, number> = {
   f4: 2 + 8 * 3,
   g4: 1 + 8 * 3,
   h4: 0 + 8 * 3,
+
   a5: 7 + 8 * 4,
   b5: 6 + 8 * 4,
   c5: 5 + 8 * 4,
@@ -167,6 +171,7 @@ export const SquareIndex: Record<Square, number> = {
   f5: 2 + 8 * 4,
   g5: 1 + 8 * 4,
   h5: 0 + 8 * 4,
+
   a6: 7 + 8 * 5,
   b6: 6 + 8 * 5,
   c6: 5 + 8 * 5,
@@ -175,14 +180,16 @@ export const SquareIndex: Record<Square, number> = {
   f6: 2 + 8 * 5,
   g6: 1 + 8 * 5,
   h6: 0 + 8 * 5,
-  a7: 0 + 8 * 6,
-  b7: 1 + 8 * 6,
-  c7: 2 + 8 * 6,
-  d7: 3 + 8 * 6,
-  e7: 4 + 8 * 6,
-  f7: 5 + 8 * 6,
-  g7: 6 + 8 * 6,
-  h7: 7 + 8 * 6,
+
+  a7: 7 + 8 * 6,
+  b7: 6 + 8 * 6,
+  c7: 5 + 8 * 6,
+  d7: 4 + 8 * 6,
+  e7: 3 + 8 * 6,
+  f7: 2 + 8 * 6,
+  g7: 1 + 8 * 6,
+  h7: 0 + 8 * 6,
+
   a8: 7 + 8 * 7,
   b8: 6 + 8 * 7,
   c8: 5 + 8 * 7,
@@ -269,6 +276,7 @@ export const SQUARES: Square[] = [
   'c1',
   'b1',
   'a1',
+
   'h2',
   'g2',
   'f2',
@@ -277,6 +285,7 @@ export const SQUARES: Square[] = [
   'c2',
   'b2',
   'a2',
+
   'h3',
   'g3',
   'f3',
@@ -285,6 +294,7 @@ export const SQUARES: Square[] = [
   'c3',
   'b3',
   'a3',
+
   'h4',
   'g4',
   'f4',
@@ -293,6 +303,7 @@ export const SQUARES: Square[] = [
   'c4',
   'b4',
   'a4',
+
   'h5',
   'g5',
   'f5',
@@ -301,6 +312,7 @@ export const SQUARES: Square[] = [
   'c5',
   'b5',
   'a5',
+
   'h6',
   'g6',
   'f6',
@@ -309,6 +321,7 @@ export const SQUARES: Square[] = [
   'c6',
   'b6',
   'a6',
+
   'h7',
   'g7',
   'f7',
@@ -317,6 +330,7 @@ export const SQUARES: Square[] = [
   'c7',
   'b7',
   'a7',
+
   'h8',
   'g8',
   'f8',
