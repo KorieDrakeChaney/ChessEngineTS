@@ -354,8 +354,7 @@ export const SQUARES: Square[] = [
  * // -> [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
  *
  * ```
- * @param board = bigint
- * @returns Square[]
+ * @param board
  */
 
 export const toSquares = (board: bigint): Square[] => {
@@ -394,7 +393,7 @@ export const toSquares = (board: bigint): Square[] => {
  * // 0 1 0 0 0 0 1 0
  * ```
  *
- * @param board - bigint
+ * @param board
  */
 
 export const logBoard = (board: bigint): void => {
