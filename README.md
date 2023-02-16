@@ -140,9 +140,9 @@ import { Board } from './Board';
 
 const board = new Board();
 
-console.log(board.validMoves('a7'))
+console.log(board.validMoves('a2'))
 
-//->[ 'a5', 'a6' ]
+//->[ 'a3', 'a4' ]
 ```
 
 ### .isInCheck() : `boolean`
