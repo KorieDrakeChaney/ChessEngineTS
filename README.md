@@ -110,6 +110,8 @@ board.loadFen('rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1')
 Returns the FEN of the current position
 
 ```ts
+import { Board } from 'chess-engine-ts'
+
 const board = new Board();
 
 board.move('a2', 'a4');
