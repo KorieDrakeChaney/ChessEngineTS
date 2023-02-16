@@ -78,11 +78,6 @@ console.log(chess.overview())
 //      {type: 'b', color: 'b', square: 'c8'},
 //      {type: 'n', color: 'b', square: 'b8'},
 //      {type: 'r', color: 'b', square: 'a8'},
-//      undefined,
-//      undefined,
-//      undefined,
-//      undefined,
-//      undefined,
 //      ...
 //      {type: 'r', color: 'w', square: 'a1'},
 //      {type: 'n', color: 'w', square: 'b1'},
