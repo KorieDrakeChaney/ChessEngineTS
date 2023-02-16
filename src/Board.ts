@@ -170,7 +170,7 @@ export class Board {
    *
    * const board = new Board('6R1/pR1B1KPk/n7/3p2b1/7p/N3P3/1Pp4r/8 w - - 0 1');
    *
-   * logBoard(board.moveList['d7']);
+   * logBoard(board.validMoveList['d7']);
    *
    * // ->
    * // 0 0 1 0 1 0 0 0
