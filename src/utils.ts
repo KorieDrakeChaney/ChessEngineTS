@@ -389,9 +389,9 @@ export const toSquares = (board: bigint): Square[] => {
  */
 
 export const logBoard = (board: bigint): void => {
-  let string = board.toString(2).padStart(64, '0');
+  const boardString = board.toString(2).padStart(64, '0');
   for (let i = 0; i < 8; i++) {
-    console.log(string.slice(i * 8, i * 8 + 8));
+    console.log(boardString.slice(i * 8, i * 8 + 8));
   }
 };
 
