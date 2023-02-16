@@ -1,5 +1,5 @@
-import { Bitboard } from './Bitboard';
 import {
+  toSquares,
   StartFEN,
   History,
   Color,
@@ -22,16 +22,77 @@ import {
   bqCastlingMask,
   FOURTHRANK,
   FIFTHRANK,
+  MoveAttackData,
 } from './utils';
 
-type MoveAttackData = {
-  moves: bigint;
-  attacks: bigint;
-};
-
 export class Board {
-  moveHistory: History = [];
-  turn: Color = 'w';
+  /**
+   * Holds the move history
+   *
+   * @example
+   * ```ts
+   * const board = new Board();
+   *
+   * board.move('a2', 'a4');
+   * board.move('a7', 'a6');
+   * board.move('b1', 'c3');
+   *
+   * console.log(board.moveHistory);
+   *
+   * //->
+   * // [
+   * //  { from : 'a2', to : 'a4' },
+   * //  { from : 'a7', to : 'a6' },
+   * //  { from : 'b1', to : 'c3' },
+   * // ]
+   *
+   * ```
+   */
+  public moveHistory: History = [];
+  /**
+   *
+   * Holds the current color
+   *
+   * @example
+   * ```ts
+   *
+   * import { Board } from 'chess-engine-ts'
+   *
+   * const board = new Board();
+   *
+   * console.log(board.turn);
+   *
+   * // -> w
+   *
+   * ```
+   */
+  public turn: Color = 'w';
+
+  /**
+   * @internal
+   * Holds a record for pseudo legal moves at dependent square
+   *
+   * @example
+   * ```ts
+   *
+   * import { Board } from 'chess-engine-ts'
+   *
+   * const board = new Board();
+   *
+   * console.log(moveList['b1'].toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 0 1 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   */
   moveList: Record<Square, bigint> = {
     a1: 0n,
     b1: 0n,
@@ -98,7 +159,31 @@ export class Board {
     g8: 0n,
     h8: 0n,
   };
-
+  /**
+   * @internal
+   * Holds a record for legal moves at dependent square
+   *
+   * @example
+   * ```ts
+   *
+   * import { Board } from 'chess-engine-ts'
+   *
+   * const board = new Board('6R1/pR1B1KPk/n7/3p2b1/7p/N3P3/1Pp4r/8 w - - 0 1');
+   *
+   * console.log(board.moveList['d7'].toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 1 0 1 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 1 0 1 0 0 0
+   * // 0 1 0 0 0 1 0 0
+   * // 1 0 0 0 0 0 1 0
+   * // 0 0 0 0 0 0 0 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   */
   validMoveList: Record<Square, bigint> = {
     a1: 0n,
     b1: 0n,
@@ -166,6 +251,28 @@ export class Board {
     h8: 0n,
   };
 
+  /**
+   * @internal
+   * Holds a record for castling rights
+   *
+   * @remark
+   * it checks true if it has the ability to castle, not if it can at that current moment
+   *
+   * @example
+   * ```ts
+   *
+   * import { Board } from 'chess-engine-ts'
+   *
+   * const board = new Board();
+   *
+   * // checks if king has the ability to castle king side
+   * console.log(board.castlingRights['w'].k);
+   *
+   * // -> true
+   *
+   * ```
+   */
+
   castlingRights: Record<Color, Record<CastlingType, boolean>> = {
     w: {
       k: true,
@@ -177,38 +284,550 @@ export class Board {
     },
   };
 
+  /**
+   * @internal
+   * King bitboard
+   *
+   * @remarks
+   * lays out where each king is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.k.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 0 0 0 0 1 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 1 0 0 0
+   *
+   * ```
+   *
+   * @group Piece Bitboards
+   */
   k = 0n;
+  /**
+   * @internal
+   * Queen bitboard
+   *
+   * @remarks
+   * lays out where each queen is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.q.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 0 0 0 1 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 1 0 0 0 0
+   *
+   * ```
+   *
+   * @group Piece Bitboards
+   */
   q = 0n;
+  /**
+   * @internal
+   * Rook bitboard
+   *
+   * @remarks
+   * lays out where each rook is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.r.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 1 0 0 0 0 0 0 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 0 0 0 0 0 0 1
+   *
+   * ```
+   *
+   * @group Piece Bitboards
+   */
   r = 0n;
+  /**
+   * @internal
+   * Bishop bitboard
+   *
+   * @remarks
+   * lays out where each bishop is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.b.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 0 0 1 0 0 1 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 1 0 0 1 0 0
+   *
+   * ```
+   *
+   * @group Piece Bitboards
+   */
   b = 0n;
+  /**
+   * @internal
+   * Knight bitboard
+   *
+   * @remarks
+   * lays out where each knight is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.n.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 0 1 0 0 0 0 1 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 1 0 0 0 0 1 0
+   *
+   * ```
+   *
+   * @group Piece Bitboards
+   */
   n = 0n;
+  /**
+   * @internal
+   * Pawn bitboard
+   *
+   * @remarks
+   * lays out where each pawn is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.p.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   *
+   * @group Piece Bitboards
+   */
   p = 0n;
 
+  /**
+   * @internal
+   * White pieces bitboard
+   *
+   * @remarks
+   * lays out where each white piece is
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.whiteBoard.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   *
+   * ```
+   *
+   * @group Color Bitboards
+   */
   whiteBoard = 0n;
+  /**
+   * @internal
+   * Black pieces bitboard
+   *
+   * @remarks
+   * lays out where each black piece is
+   *
+   * @example
+   *
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.blackBoard.toString(2).padStart(64, '0'));
+   *
+   * //->
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   * @group Color Bitboards
+   */
   blackBoard = 0n;
 
+  /**
+   * @internal
+   * White attack masks
+   *
+   * @remarks
+   * Shows all the attacks rays for the white pieces
+   *
+   * @example
+   *
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.whiteAttackMask.toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * // 0 1 1 1 1 1 1 0
+   *
+   * ```
+   *
+   * @group Attack Masks Bitboard
+   */
   whiteAttackMask = 0n;
+  /**
+   * @internal
+   * Blacks attack masks
+   *
+   * @remarks
+   * Shows all the attacks rays for the black pieces
+   *
+   * @example
+   *
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.blackAttackMask.toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 1 1 1 1 1 1 0
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   *
+   * @group Attack Masks Bitboard
+   */
   blackAttackMask = 0n;
-
+  /**
+   * @internal
+   * White valid moves
+   *
+   * @remarks
+   * Shows all the valids moves for the white pieces
+   *
+   * @example
+   *
+   * ``` ts
+   *
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.whiteValidMoves.toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   * @group Valid Moves Bitboard
+   */
   whiteValidMoves = 0n;
+  /**
+   * @internal
+   * Black valid moves
+   *
+   * @remarks
+   * Shows all the valids moves for the black pieces
+   *
+   * @example
+   *
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1');
+   *
+   * console.log(board.blackValidMoves.toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 1 1 1 1 1 1 1
+   * // 1 1 1 1 1 1 1 1
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   *
+   * @group Valid Moves Bitboard
+   */
   blackValidMoves = 0n;
 
+  /**
+   * @internal
+   * Pawn captures
+   *
+   * @remarks
+   * Shows all the capture squares for pawns
+   *
+   * @example
+   *
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board('6k1/1B2pp2/P2BP3/3ppPp1/3p4/8/4R2K/3n2r1 w - - 0 1');
+   *
+   * console.log(board.pawnCaptures['w'].toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 1 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   *
+   * @group Pawn Captures Bitboard
+   */
   pawnCaptures: Record<Color, bigint> = {
     w: 0n,
     b: 0n,
   };
-
+  /**
+   * @internal
+   * Knight moves
+   *
+   * @remarks
+   * An array that holds all knights moves dependent on which square it is on
+   * note : these moves are pseudo-legal moves
+   *
+   * @example
+   * ```ts
+   * import { Board, SquareIndex } from './chess-engine-ts';
+   *
+   *
+   * const board = new Board();
+   * console.log(board.knightMoves[SquareIndex['b1']].toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 1 0 1 0 0 0 0 0
+   * // 0 0 0 1 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   * @group Piece Move Array
+   */
   knightMoves: bigint[] = new Array().fill(0n, 0, 64);
+  /**
+   * @internal
+   * King moves
+   *
+   * @remarks
+   * An array that holds all king moves dependent on which square it is on
+   * note : these moves are pseudo-legal moves
+   * @example
+   *
+   * ```ts
+   * import { Board, SquareIndex } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   * console.log(board.kingMoves[SquareIndex['f5']].toString(2).padStart(64, '0'));
+   *
+   * // ->
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 1 1 1 0
+   * // 0 0 0 0 1 0 1 0
+   * // 0 0 0 0 1 1 1 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   * @group Piece Move Array
+   */
   kingMoves: bigint[] = new Array().fill(0n, 0, 64);
+  /**
+   * @internal
+   * Pawn attacks
+   *
+   * @remarks
+   * An array that holds all pawn attack rays dependent on square
+   * @example
+   *
+   * ```ts
+   * import { Board, SquareIndex } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   * console.log(board.pawnAttacks['w'][SquareIndex['f5']].toString(2).padStart(64, '0'));
+   *
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 1 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   * // 0 0 0 0 0 0 0 0
+   *
+   * ```
+   * @group Piece Move Array
+   */
   pawnAttacks: Record<Color, bigint[]> = {
     w: new Array().fill(0n, 0, 64),
     b: new Array().fill(0n, 0, 64),
   };
 
-  halfMove: number = 0;
-  fullMove: number = 0;
+  /**
+   * Half moves
+   *
+   * @remarks
+   * Shows how many moves have been played since the last capture or pawn moves
+   *
+   * @example
+   * ```ts
+   * import { Board } from 'chess-engine-ts'
+   *
+   * const board = new Board();
+   *
+   * board.move('b1', 'c3');
+   *
+   * console.log(board.halfMove);
+   *
+   * // -> 1
+   * ```
+   * @group Move variables
+   */
+  public halfMove: number = 0;
+  /**
+   * Full moves
+   *
+   * @remarks
+   * Shows how many complete moves have been played
+   *
+   * @example
+   * ```ts
+   * import { Board } from 'chess-engine-ts'
+   *
+   * const board = new Board();
+   *
+   * board.move('a2', 'a3');
+   * board.move('a7', 'a6');
+   *
+   * console.log(board.fullMove);
+   *
+   * // -> 2
+   * ```
+   * @group Move variables
+   */
+  public fullMove: number = 0;
 
-  enPassantSq: Square | '-' = '-';
+  /**
+   * En Passant Square
+   *
+   * @remarks
+   * Shows the En Passant Square
+   *
+   * @group En Passant Square
+   */
+  public enPassantSq: Square | '-' = '-';
 
   constructor(fen = StartFEN) {
     this.loadFen(fen);
@@ -218,14 +837,32 @@ export class Board {
     this.generateLegalMoves();
   }
 
-  loadFen(fen: string) {
+  /**
+   * Replaces current board for new FEN
+   *
+   * @param fen - FEN string
+   *
+   * @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * board.loadFen('rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1')
+   *
+   * ```
+   *
+   * @returns void
+   */
+
+  public loadFen(fen: string): void {
     const reg = /^-?[\d.]+(?:e-?\d+)?$/;
     const values = fen.replaceAll('/', ' ').split(' ');
 
     for (const [i, value] of values.entries()) {
       let offset = 0;
       for (let j = 0; j < value.length; j++) {
-        const coords = 0 + 8 * (7 - i) + offset;
+        const coords = 7 + 8 * (7 - i) - offset;
         if (reg.test(value[j])) {
           offset += Number(value[j]);
         } else {
@@ -275,6 +912,25 @@ export class Board {
     this.fullMove = Number(values[12]);
   }
 
+  /**
+   * Returns the FEN of the current position
+   *
+   * @example
+   * ```ts
+   *
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * board.move('a2', 'a4');
+   *
+   * console.log(board.exportFen());
+   *
+   * //-> rnbqkbnr/pppppppp/8/8/P7/8/1PPPPPPP/RNBQKBNR b KQkq - 0 1
+   *
+   * ```
+   * @returns string
+   */
   public exportFen(): string {
     let fen = '';
     const overview = this.overview();
@@ -324,23 +980,56 @@ export class Board {
     return fen;
   }
 
+  /**
+   * Returns an array of elements consisting of piece data or empty squares(`undefined`)
+   *
+   *
+   *  @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board()
+   *
+   * console.log(board.overview())
+   *
+   * //->    [
+   * //      {type: 'r', color: 'b', square: 'h8'},
+   * //      {type: 'n', color: 'b', square: 'g8'},
+   * //      {type: 'b', color: 'b', square: 'f8'},
+   * //      {type: 'k', color: 'b', square: 'e8'},
+   * //      {type: 'q', color: 'b', square: 'd8'},
+   * //      {type: 'b', color: 'b', square: 'c8'},
+   * //      {type: 'n', color: 'b', square: 'b8'},
+   * //      {type: 'r', color: 'b', square: 'a8'},
+   * //      ...
+   * //      {type: 'r', color: 'w', square: 'h1'},
+   * //      {type: 'n', color: 'w', square: 'g1'},
+   * //      {type: 'b', color: 'w', square: 'f1'},
+   * //      {type: 'q', color: 'w', square: 'e1'},
+   * //      {type: 'k', color: 'w', square: 'd1'},
+   * //      {type: 'n', color: 'w', square: 'c1'},
+   * //      {type: 'n', color: 'w', square: 'b1'},
+   * //      {type: 'r', color: 'w', square: 'a1'}]
+   *
+   * ```
+   *
+   */
+
   public overview(): (PieceData | undefined)[] {
     const pieces: (PieceData | undefined)[] = [];
 
-    let offset = 0;
-    for (let i = 0; i < 64; i++) {
-      const coords = 0 + 8 * (7 - offset) + (i % 8);
-      const color: Color = ((1n << BigInt(coords)) & this.whiteBoard) !== 0n ? 'w' : 'b';
-      if ((this.k & (1n << BigInt(coords))) !== 0n) pieces.push({ type: 'k', color, square: SQUARES[coords] });
-      else if ((this.q & (1n << BigInt(coords))) !== 0n) pieces.push({ type: 'q', color, square: SQUARES[coords] });
-      else if ((this.r & (1n << BigInt(coords))) !== 0n) pieces.push({ type: 'r', color, square: SQUARES[coords] });
-      else if ((this.b & (1n << BigInt(coords))) !== 0n) pieces.push({ type: 'b', color, square: SQUARES[coords] });
-      else if ((this.n & (1n << BigInt(coords))) !== 0n) pieces.push({ type: 'n', color, square: SQUARES[coords] });
-      else if ((this.p & (1n << BigInt(coords))) !== 0n) pieces.push({ type: 'p', color, square: SQUARES[coords] });
+    for (let i = 63; i >= 0; i--) {
+      const coords = 1n << BigInt(i);
+      const color: Color = (coords & this.whiteBoard) !== 0n ? 'w' : 'b';
+      if ((this.k & coords) !== 0n) pieces.push({ type: 'k', color, square: SQUARES[i] });
+      else if ((this.q & coords) !== 0n) pieces.push({ type: 'q', color, square: SQUARES[i] });
+      else if ((this.r & coords) !== 0n) pieces.push({ type: 'r', color, square: SQUARES[i] });
+      else if ((this.b & coords) !== 0n) pieces.push({ type: 'b', color, square: SQUARES[i] });
+      else if ((this.n & coords) !== 0n) pieces.push({ type: 'n', color, square: SQUARES[i] });
+      else if ((this.p & coords) !== 0n) pieces.push({ type: 'p', color, square: SQUARES[i] });
       else {
         pieces.push(undefined);
       }
-      if ((i + 1) % 8 === 0) offset++;
     }
 
     return pieces;
@@ -394,25 +1083,25 @@ export class Board {
 
     if (this.castlingRights['w'].k) {
       if ((wkCastlingMask & (this.blackAttackMask | this.whiteBoard)) === 0n) {
-        this.moveList['e1'] |= (1n << BigInt(SquareIndex['e1'])) << 2n;
+        this.moveList['e1'] |= (1n << BigInt(SquareIndex['e1'])) << -2n;
       }
     }
 
     if (this.castlingRights['w'].q) {
       if ((wqCastlingMask & (this.blackAttackMask | this.whiteBoard)) === 0n) {
-        this.moveList['e1'] |= (1n << BigInt(SquareIndex['e1'])) << -2n;
+        this.moveList['e1'] |= (1n << BigInt(SquareIndex['e1'])) << 2n;
       }
     }
 
     if (this.castlingRights['b'].k) {
       if ((bkCastlingMask & (this.whiteAttackMask | this.blackBoard)) === 0n) {
-        this.moveList['e8'] |= (1n << BigInt(SquareIndex['e8'])) << 2n;
+        this.moveList['e8'] |= (1n << BigInt(SquareIndex['e8'])) << -2n;
       }
     }
 
     if (this.castlingRights['b'].q) {
       if ((bqCastlingMask & (this.whiteAttackMask | this.blackBoard)) === 0n) {
-        this.moveList['e8'] |= (1n << BigInt(SquareIndex['e8'])) << -2n;
+        this.moveList['e8'] |= (1n << BigInt(SquareIndex['e8'])) << 2n;
       }
     }
   }
@@ -426,7 +1115,7 @@ export class Board {
     for (let i = 0; i < 64; i++) {
       const color: Color = ((1n << BigInt(i)) & this.whiteBoard) !== 0n ? 'w' : 'b';
       if (color !== this.turn) continue;
-      const moves = Bitboard.toSquares(this.moveList[SQUARES[i]]);
+      const moves = toSquares(this.moveList[SQUARES[i]]);
       if ((this.k & (1n << BigInt(i))) !== 0n) {
         this.validMoveList[SQUARES[i]] |=
           this.moveList[SQUARES[i]] & ~(color === 'w' ? this.blackAttackMask : this.whiteAttackMask);
@@ -447,10 +1136,52 @@ export class Board {
     }
   }
 
+  /**
+   * Takes in one argument of type square, returns an array of valid moves of type `Square`(`a1` | `b1`, `c1` ... `f8` | `g8` | `h8`);
+   * @example
+   *
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * console.log(board.validMoves('a2'));
+   *
+   * //->[ 'a3', 'a4' ]
+   *
+   * ```
+   *
+   * @param square - Square
+   * @returns Square[]
+   *
+   * @group Piece Moves
+   */
   public validMoves(square: Square): Square[] {
-    return Bitboard.toSquares(this.validMoveList[square]);
+    return toSquares(this.validMoveList[square]);
   }
-
+  /**
+   *
+   * Takes two arguments, both are of type `Square` (`a1` | `b1`, `c1` ... `f8` | `g8` | `h8`);
+   * whichs moves the piece from->to
+   * if move is valid it will return `true`, else `false`.
+   *
+   *  @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board();
+   *
+   * board.move('a2', 'a4'); // valid
+   * ```
+   *
+   *  @param from - Square
+   *
+   *  @param to - Square
+   *
+   *  @returns boolean
+   *
+   *  @group Piece Moves
+   */
   public move(from: Square, to: Square): boolean {
     const fromBit = 1n << BigInt(SquareIndex[from]);
     const toBit = 1n << BigInt(SquareIndex[to]);
@@ -579,6 +1310,11 @@ export class Board {
       this.blackBoard |= toBit;
     }
 
+    this.moveHistory.push({
+      from,
+      to,
+    });
+
     this.generateLegalMoves();
 
     return true;
@@ -600,9 +1336,9 @@ export class Board {
 
       if ((fromBit & FIFTHRANK) !== 0n) {
         if (((fromBit << 1n) & (this.p & blackBoard)) !== 0n)
-          if (SQUARES[from + 9] === this.enPassantSq) moves |= fromBit << 9n;
-        if (((fromBit << -1n) & (this.p & blackBoard)) !== 0n)
           if (SQUARES[from + 7] === this.enPassantSq) moves |= fromBit << 7n;
+        if (((fromBit << -1n) & (this.p & blackBoard)) !== 0n)
+          if (SQUARES[from + 9] === this.enPassantSq) moves |= fromBit << 9n;
       }
     } else {
       moves |= (fromBit << -8n) & ~this.all();
@@ -612,11 +1348,9 @@ export class Board {
 
       if ((fromBit & FOURTHRANK) !== 0n) {
         if (((fromBit << 1n) & (this.p & whiteBoard)) !== 0n)
-          if (SQUARES[from - 7] === this.enPassantSq) moves |= fromBit << -7n;
+          if (SQUARES[from - 9] === this.enPassantSq) moves |= fromBit << -9n;
         if (((fromBit << -1n) & (this.p & whiteBoard)) !== 0n)
-          if (SQUARES[from - 9] === this.enPassantSq) {
-            moves |= fromBit << -9n;
-          }
+          if (SQUARES[from - 7] === this.enPassantSq) moves |= fromBit << -7n;
       }
     }
     return moves;
@@ -629,19 +1363,19 @@ export class Board {
       let blackAttacks: bigint = 0n;
 
       if ((fromBit & HFILE) === 0n && (fromBit & EIGHTHRANK) === 0n) {
-        whiteAttacks |= fromBit << 9n;
+        whiteAttacks |= fromBit << 7n;
       }
       if ((fromBit & AFILE) === 0n && (fromBit & EIGHTHRANK) === 0n) {
-        whiteAttacks |= fromBit << 7n;
+        whiteAttacks |= fromBit << 9n;
       }
 
       this.pawnAttacks['w'][i] = whiteAttacks;
 
       if ((fromBit & HFILE) === 0n && (fromBit & FIRSTRANK) === 0n) {
-        blackAttacks |= fromBit << -7n;
+        blackAttacks |= fromBit << -9n;
       }
       if ((fromBit & AFILE) === 0n && (fromBit & FIRSTRANK) === 0n) {
-        blackAttacks |= fromBit << -9n;
+        blackAttacks |= fromBit << -7n;
       }
 
       this.pawnAttacks['b'][i] = blackAttacks;
@@ -651,11 +1385,11 @@ export class Board {
   private generateAllKnightMoves(): void {
     /*
             0 0 0 0 0 0 0 0
-            0 0 15 0 17 0 0 0
-            0 6 0 0 0 10 0 0
+            0 0 17 0 15 0 0 0
+            0 10 0 0 0 6 0 0
             0 0 0 1 0 0 0 0
-            0 -10 0 0 0 -6 0 0
-            0 0 -17  0 -15 0 0
+            0 -6 0 0 0 -10 0 0
+            0 0 -15  0 -17 0 0
             0 0 0 0 0 0 0 0
             0 0 0 0 0 0 0 0
         */
@@ -664,17 +1398,17 @@ export class Board {
       let moves: bigint = 0n;
       const fromBit: bigint = 1n << BigInt(i);
 
-      if ((fromBit & AFILE) === 0n && (fromBit & (SEVENTHRANK | EIGHTHRANK)) === 0n) moves |= fromBit << 15n;
-      if ((fromBit & HFILE) === 0n && (fromBit & (FIRSTRANK | SECONDRANK)) === 0n) moves |= fromBit << -15n;
+      if ((fromBit & AFILE) === 0n && (fromBit & (SEVENTHRANK | EIGHTHRANK)) === 0n) moves |= fromBit << 17n;
+      if ((fromBit & HFILE) === 0n && (fromBit & (FIRSTRANK | SECONDRANK)) === 0n) moves |= fromBit << -17n;
 
-      if ((fromBit & AFILE) === 0n && (fromBit & (FIRSTRANK | SECONDRANK)) === 0n) moves |= fromBit << -17n;
-      if ((fromBit & HFILE) === 0n && (fromBit & (SEVENTHRANK | EIGHTHRANK)) === 0n) moves |= fromBit << 17n;
+      if ((fromBit & AFILE) === 0n && (fromBit & (FIRSTRANK | SECONDRANK)) === 0n) moves |= fromBit << -15n;
+      if ((fromBit & HFILE) === 0n && (fromBit & (SEVENTHRANK | EIGHTHRANK)) === 0n) moves |= fromBit << 15n;
 
-      if ((fromBit & (GFILE | HFILE)) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 10n;
-      if ((fromBit & (AFILE | BFILE)) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -10n;
+      if ((fromBit & (GFILE | HFILE)) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 6n;
+      if ((fromBit & (AFILE | BFILE)) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -6n;
 
-      if ((fromBit & (AFILE | BFILE)) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 6n;
-      if ((fromBit & (GFILE | HFILE)) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -6n;
+      if ((fromBit & (AFILE | BFILE)) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 10n;
+      if ((fromBit & (GFILE | HFILE)) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -10n;
 
       this.knightMoves[i] = moves;
     }
@@ -688,14 +1422,14 @@ export class Board {
       if ((fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 8n;
       if ((fromBit & FIRSTRANK) === 0n) moves |= fromBit << -8n;
 
-      if ((fromBit & HFILE) === 0n) moves |= fromBit << 1n;
-      if ((fromBit & AFILE) === 0n) moves |= fromBit << -1n;
+      if ((fromBit & AFILE) === 0n) moves |= fromBit << 1n;
+      if ((fromBit & HFILE) === 0n) moves |= fromBit << -1n;
 
-      if ((fromBit & HFILE) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 9n;
-      if ((fromBit & AFILE) === 0n && (fromBit & EIGHTHRANK) === 0n) moves |= fromBit << 7n;
+      if ((fromBit & (AFILE | EIGHTHRANK)) === 0n) moves |= fromBit << 9n;
+      if ((fromBit & (HFILE | EIGHTHRANK)) === 0n) moves |= fromBit << 7n;
 
-      if ((fromBit & HFILE) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -7n;
-      if ((fromBit & AFILE) === 0n && (fromBit & FIRSTRANK) === 0n) moves |= fromBit << -9n;
+      if ((fromBit & (AFILE | FIRSTRANK)) === 0n) moves |= fromBit << -7n;
+      if ((fromBit & (HFILE | FIRSTRANK)) === 0n) moves |= fromBit << -9n;
 
       this.kingMoves[i] = moves;
     }
@@ -774,26 +1508,26 @@ export class Board {
       color === 'w' ? blackBoard & ~(this.k & this.blackBoard) : whiteBoard & ~(this.k & this.whiteBoard);
     const allyBoard: bigint = color === 'w' ? whiteBoard : blackBoard;
 
-    // right
+    // left
     for (let i = 1; i < 8; i++) {
       // edge check
-      if ((fromBit & HFILE) !== 0n) break;
+      if ((fromBit & AFILE) !== 0n) break;
 
       attacks |= fromBit << BigInt(i);
       moves |= (fromBit << BigInt(i)) & ~allyBoard;
       // checkcapture
-      if (((fromBit << BigInt(i)) & (enemyBoard | HFILE)) !== 0n || ((fromBit << BigInt(i)) & allyBoard) !== 0n) break;
+      if (((fromBit << BigInt(i)) & (enemyBoard | AFILE)) !== 0n || ((fromBit << BigInt(i)) & allyBoard) !== 0n) break;
     }
 
     for (let i = 1; i < 8; i++) {
       // edge check
-      if ((fromBit & AFILE) !== 0n) break;
+      if ((fromBit & HFILE) !== 0n) break;
 
       attacks |= fromBit << -BigInt(i);
       moves |= (fromBit << -BigInt(i)) & ~allyBoard;
 
       // checkcapture
-      if (((fromBit << -BigInt(i)) & (enemyBoard | AFILE)) !== 0n || ((fromBit << -BigInt(i)) & allyBoard) !== 0n)
+      if (((fromBit << -BigInt(i)) & (enemyBoard | HFILE)) !== 0n || ((fromBit << -BigInt(i)) & allyBoard) !== 0n)
         break;
     }
 
@@ -857,12 +1591,12 @@ export class Board {
     for (let i = 1; i < 8; i++) {
       // edge check
       if ((fromBit & (HFILE | EIGHTHRANK)) !== 0n) break;
-      attacks |= fromBit << BigInt(i * 9);
-      moves |= (fromBit << BigInt(i * 9)) & ~allyBoard;
+      attacks |= fromBit << BigInt(i * 7);
+      moves |= (fromBit << BigInt(i * 7)) & ~allyBoard;
       // checkcapture
       if (
-        ((fromBit << BigInt(i * 9)) & (enemyBoard | HFILE | EIGHTHRANK)) !== 0n ||
-        ((fromBit << BigInt(i * 9)) & allyBoard) !== 0n
+        ((fromBit << BigInt(i * 7)) & (enemyBoard | HFILE | EIGHTHRANK)) !== 0n ||
+        ((fromBit << BigInt(i * 7)) & allyBoard) !== 0n
       )
         break;
     }
@@ -871,13 +1605,13 @@ export class Board {
       // edge check
       if ((fromBit & (AFILE | FIRSTRANK)) !== 0n) break;
 
-      attacks |= fromBit << -BigInt(i * 9);
-      moves |= (fromBit << -BigInt(i * 9)) & ~allyBoard;
+      attacks |= fromBit << -BigInt(i * 7);
+      moves |= (fromBit << -BigInt(i * 7)) & ~allyBoard;
 
       // checkcapture
       if (
-        ((fromBit << -BigInt(i * 9)) & (enemyBoard | AFILE | FIRSTRANK)) !== 0n ||
-        ((fromBit << -BigInt(i * 9)) & allyBoard) !== 0n
+        ((fromBit << -BigInt(i * 7)) & (enemyBoard | AFILE | FIRSTRANK)) !== 0n ||
+        ((fromBit << -BigInt(i * 7)) & allyBoard) !== 0n
       )
         break;
     }
@@ -887,12 +1621,12 @@ export class Board {
       // edge check
       if ((fromBit & (EIGHTHRANK | AFILE)) !== 0n) break;
 
-      attacks |= fromBit << BigInt(i * 7);
-      moves |= (fromBit << BigInt(i * 7)) & ~allyBoard;
+      attacks |= fromBit << BigInt(i * 9);
+      moves |= (fromBit << BigInt(i * 9)) & ~allyBoard;
       // checkcapture
       if (
-        ((fromBit << BigInt(i * 7)) & (enemyBoard | EIGHTHRANK | AFILE)) !== 0n ||
-        ((fromBit << BigInt(i * 7)) & allyBoard) !== 0n
+        ((fromBit << BigInt(i * 9)) & (enemyBoard | EIGHTHRANK | AFILE)) !== 0n ||
+        ((fromBit << BigInt(i * 9)) & allyBoard) !== 0n
       )
         break;
     }
@@ -901,12 +1635,12 @@ export class Board {
       // edge check
       if ((fromBit & (FIRSTRANK | HFILE)) !== 0n) break;
 
-      attacks |= fromBit << -BigInt(i * 7);
-      moves |= (fromBit << -BigInt(i * 7)) & ~allyBoard;
+      attacks |= fromBit << -BigInt(i * 9);
+      moves |= (fromBit << -BigInt(i * 9)) & ~allyBoard;
       // checkcapture
       if (
-        ((fromBit << -BigInt(i * 7)) & (enemyBoard | FIRSTRANK | HFILE)) !== 0n ||
-        ((fromBit << -BigInt(i * 7)) & allyBoard) !== 0n
+        ((fromBit << -BigInt(i * 9)) & (enemyBoard | FIRSTRANK | HFILE)) !== 0n ||
+        ((fromBit << -BigInt(i * 9)) & allyBoard) !== 0n
       )
         break;
     }
@@ -931,18 +1665,69 @@ export class Board {
           0n;
   }
 
-  public isInCheck(): boolean {
+  /**
+   * Returns if current color is in check
+   *
+   *  @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board('3b1q1q/1N2PRQ1/rR3KBr/B4PP1/2Pk1r1b/1P2P1N1/2P2P2/8 b - -');
+   *
+   * console.log(board.isCheck());
+   *
+   * //-> true
+   * ```
+   *
+   *  @group Board State
+   */
+  public isCheck(): boolean {
     return this.turn === 'w'
       ? (this.blackAttackMask & (this.k & this.whiteBoard)) !== 0n
       : (this.whiteAttackMask & (this.k & this.blackBoard)) !== 0n;
   }
-
+  /**
+   * Returns if current color is mated
+   *
+   * Similar to {@link isStalemate}, but returns true if is in check and no valid moves
+   *
+   *  @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board('3b1q1q/1N2PRQ1/rR3KBr/B4PP1/2Pk1r1b/1P2P1N1/2P2P2/8 b - -');
+   *
+   * console.log(board.isMate());
+   *
+   * //-> true
+   * ```
+   *
+   *  @group Board State
+   */
   public isMate(): boolean {
-    return (this.turn === 'w' ? this.whiteValidMoves === 0n : this.blackValidMoves === 0n) && this.isInCheck();
+    return (this.turn === 'w' ? this.whiteValidMoves === 0n : this.blackValidMoves === 0n) && this.isCheck();
   }
 
+  /**
+   * Returns if current color is stalemated
+   *
+   *
+   * Similar to {@link isMate}, but returns true if not in check and no valid moves
+   *
+   *  @example
+   * ```ts
+   * import { Board } from './chess-engine-ts';
+   *
+   * const board = new Board('8/6p1/5p2/5k1K/7P/8/8/8 w - - -');
+   *
+   * console.log(board.isStalemate());
+   *
+   * //-> true
+   * ```
+   *  @group Board State
+   */
   public isStalemate(): boolean {
-    return (this.turn === 'w' ? this.whiteValidMoves === 0n : this.blackValidMoves === 0n) && !this.isInCheck();
+    return (this.turn === 'w' ? this.whiteValidMoves === 0n : this.blackValidMoves === 0n) && !this.isCheck();
   }
 
   private all(): bigint {
