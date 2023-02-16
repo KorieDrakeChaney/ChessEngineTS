@@ -34,6 +34,7 @@ The code below creates a board with pieces at starting position
 import { Board } from 'chess-engine-ts'
 
 const board = new Board();
+
 ```
 
 ## User Interface
@@ -49,6 +50,8 @@ configuration in
 [Forsyth-Edwards Notation (FEN)](https://www.chess.com/terms/fen-chess).
 
 ```ts
+import { Board } from 'chess-engine-ts'
+
 // board defaults to the starting position when called with no parameters
 const board = new Board()
 
@@ -145,7 +148,7 @@ console.log(board.validMoves('a2'))
 //->[ 'a3', 'a4' ]
 ```
 
-### .isInCheck() : `boolean`
+### .isCheck() : `boolean`
 
 returns if current color is in check
 
@@ -154,7 +157,7 @@ import { Board } from './Board';
 
 const board = new Board('3b1q1q/1N2PRQ1/rR3KBr/B4PP1/2Pk1r1b/1P2P1N1/2P2P2/8 b - -');
 
-console.log(board.isInCheck())
+console.log(board.isCheck())
 
 //-> true
 ```
