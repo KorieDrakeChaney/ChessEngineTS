@@ -1447,23 +1447,23 @@ export class Board {
         if ((toBit & this.blackAttackMask) !== 0n) return false;
 
         if ((toBit & (1n << BigInt(SquareIndex['g1']))) !== 0n && this.castlingRights[color].k) {
-          this.r &= ~(1n << BigInt(SquareIndex['h1']));
           this.r |= 1n << BigInt(SquareIndex['f1']);
           this.whiteBoard |= 1n << BigInt(SquareIndex['f1']);
+          this.whiteBoard &= ~(1n << BigInt(SquareIndex['h1']));
         } else if ((toBit & (1n << BigInt(SquareIndex['c1']))) !== 0n && this.castlingRights[color].q) {
-          this.r &= ~(1n << BigInt(SquareIndex['a1']));
-          this.r |= 1n << BigInt(SquareIndex['d1']);
+          this.r |= 1n << BigInt(SquareIndex['a1']);
+          this.whiteBoard &= ~(1n << BigInt(SquareIndex['a1']));
           this.whiteBoard |= 1n << BigInt(SquareIndex['d1']);
         }
       } else {
         if ((toBit & (1n << BigInt(SquareIndex['g8']))) !== 0n && this.castlingRights[color].k) {
-          this.r &= ~(1n << BigInt(SquareIndex['h8']));
           this.r |= 1n << BigInt(SquareIndex['f8']);
           this.blackBoard |= 1n << BigInt(SquareIndex['f8']);
+          this.blackBoard &= ~(1n << BigInt(SquareIndex['h8']));
         } else if ((toBit & (1n << BigInt(SquareIndex['c8']))) !== 0n && this.castlingRights[color].q) {
-          this.r &= ~(1n << BigInt(SquareIndex['a8']));
           this.r |= 1n << BigInt(SquareIndex['d8']);
           this.blackBoard |= 1n << BigInt(SquareIndex['d8']);
+          this.blackBoard &= ~(1n << BigInt(SquareIndex['a8']));
         }
       }
     }
