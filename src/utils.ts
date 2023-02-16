@@ -383,6 +383,15 @@ export const toSquares = (board: bigint): Square[] => {
  *  // logs all the knight pieces
  *  logBoard(board.n);
  *
+ * //->
+ * // 0 1 0 0 0 0 1 0
+ * // 0 0 0 0 0 0 0 0
+ * // 0 0 0 0 0 0 0 0
+ * // 0 0 0 0 0 0 0 0
+ * // 0 0 0 0 0 0 0 0
+ * // 0 0 0 0 0 0 0 0
+ * // 0 0 0 0 0 0 0 0
+ * // 0 1 0 0 0 0 1 0
  * ```
  *
  * @param board - bigint
