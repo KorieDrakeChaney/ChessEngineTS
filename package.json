@@ -6,7 +6,7 @@
     "format": "prettier --write \"src/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "deploy": "gh-pages -d docs",
-    "preversion": "tsc && yarn lint && yarn format && document",
+    "preversion": "tsc && yarn lint && yarn format",
     "postpublish": "gh-pages -d build",
     "test": "tsc && node dist/index.js",
     "document": "typedoc"
