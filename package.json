@@ -5,7 +5,7 @@
   "scripts": {
     "format": "prettier --write \"src/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "deploy": "gh-pages -d docs",
+    "deploy": "yarn document && gh-pages -d docs",
     "preversion": "tsc && yarn lint && yarn format",
     "test": "tsc && node dist/index.js",
     "document": "typedoc"
@@ -14,7 +14,7 @@
     "type": "git",
     "url": "git+https://github.com/KorieDrakeChaney/ChessEngineTS.git"
   },
-  "keywords": [],
+  "keywords": ["chess", "chess-engine", "typescript", "bitboards"],
   "author": "KorieDrakeChaney",
   "license": "MIT",
   "files": [
