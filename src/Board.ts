@@ -445,21 +445,12 @@ export class Board {
             default:
               let king = this.pieces[Piece.KING] & this.get_color(color);
 
-              switch (color) {
-                case true:
-                  if ((enemy_attack_mask & king) == 0n) {
-                    legal_moves |= potential_square;
-                  }
-                  break;
-                case false:
-                  if ((enemy_attack_mask & king) == 0n) {
-                    legal_moves |= potential_square;
-                  }
-                  break;
+              if ((enemy_attack_mask & king) == 0n) {
+                legal_moves |= potential_square;
               }
           }
         }
-        this.legal_moves[square as Square] = moves;
+        this.legal_moves[square as Square] = legal_moves;
       }
     });
   }
@@ -491,7 +482,9 @@ export class Board {
             }
             this.pseudo_legal_moves[SQUARES[i]] = this.generate_pawn_moves(square);
             break;
-          case Piece.BISHOP | Piece.ROOK | Piece.QUEEN:
+          case Piece.BISHOP:
+          case Piece.ROOK:
+          case Piece.QUEEN:
             mask = 0n;
 
             switch (piece) {
@@ -521,7 +514,7 @@ export class Board {
                 break;
             }
 
-            this.pseudo_legal_moves[SQUARES[i]] = mask;
+            this.pseudo_legal_moves[SQUARES[i]] = mask & ~this.get_color(color);
             break;
           case Piece.KING:
             mask = this.generate_king_moves(square);
@@ -692,7 +685,7 @@ export class Board {
 
     let left = square;
     while ((left & FILE_A) == 0n) {
-      left <<= 1n;
+      left >>= 1n;
       mask |= left;
       if ((left & board) != 0n) {
         break;
@@ -701,7 +694,7 @@ export class Board {
 
     let right = square;
     while ((right & FILE_H) == 0n) {
-      right >>= 1n;
+      right <<= 1n;
       mask |= right;
       if ((right & board) != 0n) {
         break;
@@ -765,11 +758,11 @@ export class Board {
     }
 
     if ((square & FILE_A) == 0n) {
-      mask |= square << 1n;
+      mask |= square >> 1n;
     }
 
     if ((square & FILE_H) == 0n) {
-      mask |= square >> 1n;
+      mask |= square << 1n;
     }
 
     if ((square & (RANK_8 | FILE_A)) == 0n) {
@@ -856,7 +849,7 @@ export class Board {
       from = 1n << BigInt(SquareIndex[move.from]);
       to = 1n << BigInt(SquareIndex[move.to]);
       let potential_piece = this.get_piece_from_bitboards(this.pieces, from);
-      if (!potential_piece) {
+      if (potential_piece == undefined) {
         return;
       }
       piece = potential_piece;
@@ -1028,7 +1021,7 @@ export class Board {
                     white |= to;
                     if ((black & valid_square) != 0n) {
                       let captured_piece = this.get_piece_from_bitboards(pieces, valid_square);
-                      if (captured_piece) {
+                      if (captured_piece != undefined) {
                         pieces[captured_piece] ^= valid_square;
                         black ^= valid_square;
                         captured = captured_piece;
@@ -1040,7 +1033,7 @@ export class Board {
                     black |= to;
                     if ((white & valid_square) != 0n) {
                       let captured_piece = this.get_piece_from_bitboards(pieces, valid_square);
-                      if (captured_piece) {
+                      if (captured_piece != undefined) {
                         pieces[captured_piece] ^= valid_square;
                         white ^= valid_square;
                         captured = captured_piece;
@@ -1106,7 +1099,7 @@ export class Board {
                     white |= to;
                     if ((black & valid_square) != 0n) {
                       let captured_piece = this.get_piece_from_bitboards(pieces, valid_square);
-                      if (captured_piece) {
+                      if (captured_piece != undefined) {
                         pieces[captured_piece] ^= valid_square;
                         black ^= valid_square;
                         captured = captured_piece;
@@ -1118,7 +1111,7 @@ export class Board {
                     black |= to;
                     if ((white & valid_square) != 0n) {
                       let captured_piece = this.get_piece_from_bitboards(pieces, valid_square);
-                      if (captured_piece) {
+                      if (captured_piece != undefined) {
                         pieces[captured_piece] ^= valid_square;
                         white ^= valid_square;
                         captured = captured_piece;
@@ -1145,7 +1138,6 @@ export class Board {
 
   public move(move: string | Move): void {
     let chess_move = this.get_move(move);
-    console.log(this.get_move(move));
 
     if (chess_move) {
       let before = this.export_fen();
@@ -1239,6 +1231,12 @@ export class Board {
                   }
                 }
               }
+
+              if ((to_square & RANK_8) != 0n) {
+                if (chess_move.promotion == undefined) {
+                  chess_move.promotion = Piece.QUEEN;
+                }
+              }
               break;
             case false:
               if ((from_square & RANK_7) != 0n) {
@@ -1255,6 +1253,13 @@ export class Board {
                   }
                 }
               }
+
+              if ((to_square & RANK_1) != 0n) {
+                if (chess_move.promotion == undefined) {
+                  chess_move.promotion = Piece.QUEEN;
+                }
+              }
+
               break;
           }
       }
@@ -1355,22 +1360,21 @@ export class Board {
           case true:
             this.white ^= from_square;
             this.white |= to_square;
-
             if ((this.black & to_square) != 0n) {
               let captured_piece = this.get_piece_from_bitboards(this.pieces, to_square);
-              if (captured_piece) {
+              if (captured_piece != undefined) {
                 this.pieces[captured_piece] ^= to_square;
                 this.black ^= to_square;
               }
             }
+
             break;
           case false:
             this.black ^= from_square;
             this.black |= to_square;
-
             if ((this.white & to_square) != 0n) {
               let captured_piece = this.get_piece_from_bitboards(this.pieces, to_square);
-              if (captured_piece) {
+              if (captured_piece != undefined) {
                 this.pieces[captured_piece] ^= to_square;
                 this.white ^= to_square;
               }
@@ -1386,7 +1390,7 @@ export class Board {
 
             if ((this.black & to_square) != 0n) {
               let captured_piece = this.get_piece_from_bitboards(this.pieces, to_square);
-              if (captured_piece) {
+              if (captured_piece != undefined) {
                 this.pieces[captured_piece] ^= to_square;
                 this.black ^= to_square;
               }
@@ -1398,17 +1402,17 @@ export class Board {
 
             if ((this.white & to_square) != 0n) {
               let captured_piece = this.get_piece_from_bitboards(this.pieces, to_square);
-              if (captured_piece) {
+              if (captured_piece != undefined) {
                 this.pieces[captured_piece] ^= to_square;
                 this.white ^= to_square;
               }
             }
             break;
         }
+        this.pieces[chess_move.piece] |= to_square;
       }
 
       this.pieces[chess_move.piece] ^= from_square;
-      this.pieces[chess_move.piece] |= to_square;
 
       if (!this.turn) {
         this.full_move += 1;
