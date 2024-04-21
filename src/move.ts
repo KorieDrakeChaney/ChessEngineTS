@@ -1,4 +1,4 @@
-import { CastlingType, Square } from './types';
+import { Capture, CastlingType, Color, PieceType, Square } from './types';
 import {
   FILE_A,
   FILE_B,
@@ -20,48 +20,62 @@ import {
 } from './utils';
 
 export class ChessMove {
-  public piece: Piece;
+  readonly piece: PieceType;
+  readonly color: Color;
 
-  public before: string;
-  public after: string;
+  readonly before: string;
+  readonly after: string;
 
-  public from: Square;
-  public to: Square;
+  readonly from: Square;
+  readonly to: Square;
 
-  public captured?: Piece;
-  public promotion?: Piece;
+  readonly capture?: Capture;
+  readonly promotion?: PieceType;
 
-  public castling?: CastlingType;
+  readonly castling?: CastlingType;
+
+  readonly check?: boolean;
+  readonly checkmate?: boolean;
+
+  readonly san: string;
 
   constructor(
-    piece: Piece,
+    piece: PieceType,
+    color: Color,
     before: string,
     after: string,
     from: Square,
     to: Square,
-    captured?: Piece,
-    promotion?: Piece,
+    san: string,
+    capture?: Capture,
+    promotion?: PieceType,
     castling?: CastlingType,
+    check?: boolean,
+    checkmate?: boolean,
   ) {
     this.piece = piece;
+    this.color = color;
     this.before = before;
     this.after = after;
     this.from = from;
     this.to = to;
-    this.captured = captured;
+    this.capture = capture;
     this.promotion = promotion;
     this.castling = castling;
+    this.san = san;
+    this.check = check;
+    this.checkmate = checkmate;
   }
 }
 
 export class SanMove {
-  public san: string;
-  public piece: Piece;
-  public to: bigint;
-  public from: bigint;
+  readonly san: string;
+  readonly piece: Piece;
+  readonly to: bigint;
+  readonly from: bigint;
 
-  public promotion?: Piece;
-  public castling?: CastlingType;
+  readonly promotion?: Piece;
+  readonly castling?: CastlingType;
 
   constructor(san: string) {
     this.san = san;
@@ -266,10 +280,8 @@ export class SanMove {
       this.promotion = promotion_piece;
     }
 
-    if (from === 0n && to === 0n) {
+    if (from === 0n && to === 0n && !this.castling) {
       throw new Error('Invalid move');
     }
-
-    console.log(this);
   }
 }

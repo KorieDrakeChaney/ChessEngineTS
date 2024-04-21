@@ -1,4 +1,4 @@
-import { Square } from './types';
+import { PieceType, Square } from './types';
 
 export const RANK_1: bigint = 0b0000000000000000000000000000000000000000000000000000000011111111n;
 export const RANK_2: bigint = 0b0000000000000000000000000000000000000000000000001111111100000000n;
@@ -42,6 +42,24 @@ export enum Piece {
   QUEEN = 4,
   KING = 5,
 }
+
+export const PieceIndex: Record<PieceType, number> = {
+  p: 0,
+  b: 1,
+  n: 2,
+  r: 3,
+  q: 4,
+  k: 5,
+};
+
+export const PieceTypeIndex: Record<Piece, PieceType> = {
+  0: 'p',
+  1: 'b',
+  2: 'n',
+  3: 'r',
+  4: 'q',
+  5: 'k',
+};
 
 export const SquareIndex: Record<Square, number> = {
   a1: 0 + 8 * 0,
@@ -184,68 +202,6 @@ export const SQUARES: Square[] = [
   'h8',
 ];
 
-/**
- *
- * Returns an array of the squares that represent a bigint
- *
- * @example
- * ```ts
- * import {toSquares, HFILE} from 'chess-engine-ts';
- *
- * console.log(toSquares(HFILE));
- *
- * // -> [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7', 'h8']
- *
- * ```
- * @param board
- */
-
-export const toSquares = (board: bigint): Square[] => {
-  const squares: Square[] = [];
-  let bit: bigint = 1n;
-  for (let i = 0; i < 64; i++) {
-    if ((board & bit) !== 0n) {
-      squares.push(SQUARES[i]);
-    }
-    bit = bit << 1n;
-  }
-  return squares;
-};
-
-/**
- *
- * Logs 8x8 representation of the bigint
- *
- * @example
- * ```ts
- * import { Board, logBoard } from 'chess-engine-ts';
- *
- *  const board = new Board();
- *
- *  // logs all the knight pieces
- *  logBoard(board.n);
- *
- * //->
- * // 0 1 0 0 0 0 1 0
- * // 0 0 0 0 0 0 0 0
- * // 0 0 0 0 0 0 0 0
- * // 0 0 0 0 0 0 0 0
- * // 0 0 0 0 0 0 0 0
- * // 0 0 0 0 0 0 0 0
- * // 0 0 0 0 0 0 0 0
- * // 0 1 0 0 0 0 1 0
- * ```
- *
- * @param board
- */
-
-export const logBoard = (board: bigint): void => {
-  const boardString = board.toString(2).padStart(64, '0');
-  for (let i = 0; i < 8; i++) {
-    console.log(boardString.slice(i * 8, i * 8 + 8));
-  }
-};
-
 export const getSquaresFromBigInt = (board: bigint): Square[] => {
   const squares: Square[] = [];
   let bit: bigint = 1n;
@@ -258,7 +214,7 @@ export const getSquaresFromBigInt = (board: bigint): Square[] => {
   return squares;
 };
 
-export const squareFromBigInt = (board: bigint): Square | undefined => {
+export const getSquareFromBigInt = (board: bigint): Square | undefined => {
   switch (board) {
     case 0b0000000000000000000000000000000000000000000000000000000000000001n:
       return 'a1';
@@ -392,3 +348,116 @@ export const squareFromBigInt = (board: bigint): Square | undefined => {
 };
 
 export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+export const getSquares = (moves: bigint): Array<bigint> => {
+  let squares = [];
+  for (let i = 0; i < 64; i++) {
+    if ((moves & (1n << BigInt(i))) != 0n) {
+      squares.push(1n << BigInt(i));
+    }
+  }
+  return squares;
+};
+
+export const getFen = (
+  white: bigint,
+  black: bigint,
+  pieces: [bigint, bigint, bigint, bigint, bigint, bigint],
+  turn: boolean,
+  half_move: number,
+  full_move: number,
+  en_passant_square: Square | undefined,
+  castle_rights: [boolean, boolean, boolean, boolean],
+): string => {
+  let fen = '';
+  let board = white | black;
+  let empty = 0;
+
+  for (let rank = 0; rank < 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+      let square = 1n << BigInt(56 - rank * 8 + file);
+      let color = (white & square) != 0n;
+
+      if ((board & square) == 0n) {
+        empty++;
+      } else {
+        if (empty > 0) {
+          fen += empty;
+          empty = 0;
+        }
+
+        switch (getPieceFromBitboards(pieces, square)) {
+          case Piece.PAWN:
+            fen += color ? 'P' : 'p';
+            break;
+          case Piece.KNIGHT:
+            fen += color ? 'N' : 'n';
+            break;
+
+          case Piece.BISHOP:
+            fen += color ? 'B' : 'b';
+            break;
+
+          case Piece.ROOK:
+            fen += color ? 'R' : 'r';
+            break;
+
+          case Piece.QUEEN:
+            fen += color ? 'Q' : 'q';
+            break;
+
+          case Piece.KING:
+            fen += color ? 'K' : 'k';
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    if (empty > 0) {
+      fen += empty;
+      empty = 0;
+    }
+
+    if (rank < 7) {
+      fen += '/';
+    }
+  }
+
+  let castling = '';
+
+  if (castle_rights[0]) {
+    castling += 'K';
+  }
+
+  if (castle_rights[1]) {
+    castling += 'Q';
+  }
+
+  if (castle_rights[2]) {
+    castling += 'k';
+  }
+
+  if (castle_rights[3]) {
+    castling += 'q';
+  }
+
+  if (castling == '') {
+    castling = '-';
+  }
+
+  fen += `${turn ? ' w' : ' b'} ${castling} ${en_passant_square ?? '-'} ${half_move} ${full_move}`;
+
+  return fen;
+};
+
+export const getPieceFromBitboards = (
+  pieces: [bigint, bigint, bigint, bigint, bigint, bigint],
+  square: bigint,
+): Piece | undefined => {
+  for (let i = 0; i < pieces.length; i++) {
+    if ((pieces[i] & square) != 0n) {
+      return i;
+    }
+  }
+};

@@ -12,7 +12,7 @@ export type TemporaryMove = {
   to: Square;
   castling?: CastlingType;
   promotion?: Piece;
-  captured?: Piece;
+  capture?: Capture;
 };
 
 export type CastlingType = 'k' | 'q';
@@ -87,3 +87,11 @@ export type Square =
   | 'f8'
   | 'g8'
   | 'h8';
+
+export type PieceType = 'p' | 'n' | 'b' | 'r' | 'q' | 'k';
+export type Color = 'w' | 'b';
+
+export type Capture = {
+  piece: PieceType;
+  square: Square;
+};

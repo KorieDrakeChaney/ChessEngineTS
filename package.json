@@ -1,6 +1,6 @@
 {
   "name": "chess-engine-ts",
-  "version": "0.6.17",
+  "version": "0.6.55",
   "scripts": {
     "format": "prettier --write \"src/*.ts\"",
     "lint": "tslint -p tsconfig.json",
