@@ -461,3 +461,19 @@ export const getPieceFromBitboards = (
     }
   }
 };
+
+export const getAsciiFromBitboard = (bitboard: bigint): string => {
+  let ascii = '';
+  for (let i = 0; i < 64; i++) {
+    let index = 56 - Math.floor(i / 8) * 8 + (i % 8);
+    if ((bitboard & (1n << BigInt(index))) != 0n) {
+      ascii += '1';
+    } else {
+      ascii += '0';
+    }
+    if (i % 8 == 7) {
+      ascii += '\n';
+    }
+  }
+  return ascii;
+};

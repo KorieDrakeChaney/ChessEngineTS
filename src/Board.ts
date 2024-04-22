@@ -29,6 +29,7 @@ import {
   BLACK_QUEEN_SIDE_CASTLE_SQUARE,
   PieceTypeIndex,
   getSquareFromBigInt,
+  getAsciiFromBitboard,
 } from './utils';
 
 export class Board {
@@ -291,28 +292,39 @@ export class Board {
     this.generatePseudoLegalMoves();
 
     Object.entries(this.pseudo_legal_moves).forEach(([square, moves]) => {
-      let current_squrare = 1n << BigInt(SquareIndex[square as Square]);
+      let current_square = 1n << BigInt(SquareIndex[square as Square]);
 
-      let color = (this.white & current_squrare) != 0n;
-      let piece = getPieceFromBitboards(this.pieces, current_squrare);
+      let color = (this.white & current_square) != 0n;
+      let piece = getPieceFromBitboards(this.pieces, current_square);
 
-      if ((current_squrare & this.getColor(this.turn)) == 0n || (current_squrare && this.all() == 0n)) {
+      if (
+        (current_square & this.getColor(this.turn)) == 0n ||
+        (current_square & this.all()) == 0n ||
+        piece == undefined
+      ) {
         this.legal_moves[square as Square] = 0n;
       } else {
         let legal_moves = 0n;
-        let current_board_without_piece = this.all() & ~current_squrare;
+
+        let white = this.turn ? this.white ^ current_square : this.white;
+        let black = this.turn ? this.black : this.black ^ current_square;
 
         for (const potential_square of getSquares(moves)) {
-          let board = current_board_without_piece | potential_square;
+          white = this.turn ? white | potential_square : white;
+          black = this.turn ? black : black | potential_square;
+
           let pieces: [bigint, bigint, bigint, bigint, bigint, bigint] = [...this.pieces];
-          if ((potential_square & this.getColor(!this.turn)) != 0n) {
+          pieces[piece] ^= current_square;
+          pieces[piece] |= potential_square;
+
+          if ((potential_square & (this.turn ? black : white)) != 0n) {
             let captured_piece = getPieceFromBitboards(pieces, potential_square);
             if (captured_piece != undefined) {
               pieces[captured_piece] ^= potential_square;
             }
           }
 
-          let enemy_attack_mask = this.getAttackMask(color, board, pieces);
+          let enemy_attack_mask = this.getAttackMask(color, white, black, pieces);
 
           switch (piece) {
             case Piece.KING:
@@ -357,7 +369,7 @@ export class Board {
               }
               break;
             default:
-              let king = this.pieces[Piece.KING] & this.getColor(color);
+              let king = pieces[Piece.KING] & (this.turn ? white : black);
 
               if ((enemy_attack_mask & king) == 0n) {
                 legal_moves |= potential_square;
@@ -465,11 +477,11 @@ export class Board {
       case true:
         mask = 0n;
 
-        if (((square << BigInt(7)) & this.black) != 0n) {
+        if (((square << BigInt(7)) & this.black) != 0n && (square & FILE_A) == 0n) {
           mask |= square << BigInt(7);
         }
 
-        if (((square << BigInt(9)) & this.black) != 0n) {
+        if (((square << BigInt(9)) & this.black) != 0n && (square & FILE_H) == 0n) {
           mask |= square << BigInt(9);
         }
 
@@ -493,11 +505,11 @@ export class Board {
       case false:
         mask = 0n;
 
-        if (((square >> BigInt(7)) & this.white) != 0n) {
+        if (((square >> BigInt(7)) & this.white) != 0n && (square & FILE_H) == 0n) {
           mask |= square >> BigInt(7);
         }
 
-        if (((square >> BigInt(9)) & this.white) != 0n) {
+        if (((square >> BigInt(9)) & this.white) != 0n && (square & FILE_A) == 0n) {
           mask |= square >> BigInt(9);
         }
 
@@ -694,12 +706,13 @@ export class Board {
 
   private getAttackMask(
     color: boolean,
-    board: bigint,
+    white: bigint,
+    black: bigint,
     pieces: [bigint, bigint, bigint, bigint, bigint, bigint],
   ): bigint {
     let enemy_attack_mask = 0n;
-
-    for (let i = 0; i < 63; i++) {
+    let board = white | black;
+    for (let i = 0; i < 64; i++) {
       let square = 1n << BigInt(i);
 
       if ((square & board) == 0n) {
@@ -707,45 +720,58 @@ export class Board {
       }
 
       let piece = getPieceFromBitboards(pieces, square);
-      let piece_color = (this.white & square) != 0n;
 
-      if (piece_color == color) {
-        continue;
-      }
+      let piece_color = (white & square) != 0n;
 
-      switch (piece) {
-        case Piece.PAWN:
-          switch (color) {
-            case true:
-              enemy_attack_mask |= square << BigInt(7);
-              enemy_attack_mask |= square << BigInt(9);
-              break;
-            case false:
-              enemy_attack_mask |= square >> BigInt(7);
-              enemy_attack_mask |= square >> BigInt(9);
-              break;
-          }
-          break;
-        case Piece.BISHOP:
-          enemy_attack_mask |= this.generateBishopMoves(square, board);
-          break;
-        case Piece.ROOK:
-          enemy_attack_mask |= this.generateRookMoves(square, board);
-          break;
-        case Piece.QUEEN:
-          enemy_attack_mask |= this.generateQueenMoves(square, board);
-          break;
-        case Piece.KNIGHT:
-          enemy_attack_mask |= this.generateKnightMoves(square);
-          break;
-        case Piece.KING:
-          enemy_attack_mask |= this.generateKingMoves(square);
-          break;
-        default:
-          break;
+      if (piece != undefined && piece_color != color) {
+        switch (piece) {
+          case Piece.PAWN:
+            switch (!color) {
+              case true:
+                if ((square & FILE_A) == 0n) {
+                  let top_left = square << BigInt(7);
+                  enemy_attack_mask |= top_left;
+                }
+
+                if ((square & FILE_H) == 0n) {
+                  let top_right = square << BigInt(9);
+                  enemy_attack_mask |= top_right;
+                }
+                break;
+              case false:
+                if ((square & FILE_A) == 0n) {
+                  let bottom_left = square >> BigInt(9);
+                  enemy_attack_mask |= bottom_left;
+                }
+
+                if ((square & FILE_H) == 0n) {
+                  let bottom_right = square >> BigInt(7);
+                  enemy_attack_mask |= bottom_right;
+                }
+
+                break;
+            }
+            break;
+          case Piece.BISHOP:
+            enemy_attack_mask |= this.generateBishopMoves(square, board);
+            break;
+          case Piece.ROOK:
+            enemy_attack_mask |= this.generateRookMoves(square, board);
+            break;
+          case Piece.QUEEN:
+            enemy_attack_mask |= this.generateQueenMoves(square, board);
+            break;
+          case Piece.KNIGHT:
+            enemy_attack_mask |= this.generateKnightMoves(square);
+            break;
+          case Piece.KING:
+            enemy_attack_mask |= this.generateKingMoves(square);
+            break;
+          default:
+            break;
+        }
       }
     }
-
     return enemy_attack_mask;
   }
 
@@ -1077,6 +1103,23 @@ export class Board {
       let before = this.exportFen();
       if (chess_move.capture) {
         this.half_move = 0;
+
+        if (chess_move.capture.piece == 'r') {
+          switch (chess_move.capture.square) {
+            case 'a8':
+              this.castle_rights[3] = false;
+              break;
+            case 'h8':
+              this.castle_rights[2] = false;
+              break;
+            case 'a1':
+              this.castle_rights[1] = false;
+              break;
+            case 'h1':
+              this.castle_rights[0] = false;
+              break;
+          }
+        }
       } else {
         switch (chess_move.piece) {
           case Piece.PAWN:
@@ -1454,7 +1497,7 @@ export class Board {
 
   public isChecked(): boolean {
     let king = this.pieces[Piece.KING] & this.getColor(this.turn);
-    let enemy_attack_mask = this.getAttackMask(this.turn, this.all(), this.pieces);
+    let enemy_attack_mask = this.getAttackMask(this.turn, this.white, this.black, this.pieces);
 
     return (enemy_attack_mask & king) != 0n;
   }
